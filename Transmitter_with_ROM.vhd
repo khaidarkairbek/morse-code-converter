@@ -32,7 +32,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Transmitter_with_ROM is
-  Port ( clk_port : in STD_Logic);
+    Port ( 
+        data_in : in std_logic_vector(7 downto 0);
+        transmit_en : in std_logic; 
+        queue_empty: in std_logic; 
+        clk_port : in STD_Logic;
+        tx: out std_logic; 
+        );
 end Transmitter_with_ROM;
 
 architecture Behavioral of Transmitter_with_ROM is
@@ -53,8 +59,70 @@ signal ascii_char : STD_Logic_vector(7 downto 0);
 Signal Morse_code : std_logic_vector(19 downto 0);
 signal Morse_Code_Length : integer := 0;
 
+-- Datapath signals
+constant BAUD_PERIOD : integer := 400;
+signal new_bit : std_logic := '0'; 
+signal baud_tc : std_logic := '0';
+signal bit_count : integer := 0;
+signal data_register : std_logic_vector(19 downto 0) := (others => '0');
+signal baud_count: unsigned(8 downto 0) := (others => '0');
 
 begin
+
+-------------------
+-- Baud counter 
+-------------------
+baud_counter: process(clk_port, baud_count)
+begin
+    if rising_edge(clk_port) then 
+        baud_count <= baud_count + 1;
+        if symbol_load = '1' or baud_tc = '1' then   
+            baud_count <= (others => '0'); 
+        end if;
+    end if; 
+
+    baud_tc <= '0';
+    if baud_count = BAUD_PERIOD-1 then
+        baud_tc <= '1';
+    end if;
+end process; 
+
+bit_counter: process(clk_port, bit_count, symbol_load)
+begin
+    if rising_edge(clk_port) then 
+        if new_bit = '1' and Length_cnt_en = '1' then 
+            bit_count <= bit_count - 1; 
+        end if; 
+        if symbol_load = '1' or length_tc = '1' then 
+            bit_count <= (others => '0'); 
+        end if; 
+    end if; 
+
+    length_tc <= '0'; 
+    if bit_count = 0 then 
+        length_tc <= '1'; 
+    end if; 
+
+    if symbol_load = '1' then 
+        bit_count <= Morse_code_length; 
+    end if;
+end process; 
+
+shift_register: process(clk_port)
+begin
+    if rising_edge(clk_port) then 
+        if new_bit = '1' then 
+            data_register <= data_register(18 downto 0) & '0'; 
+        end if;
+    end if; 
+
+    if symbol_load = '1' then 
+        data_register <= Morse_code; 
+    end if;
+end process;
+
+tx <= data_register(19); 
+
 
 -------------------
 --FSM LOGIC 
@@ -101,14 +169,10 @@ begin
     Length_cnt_en <= '0';
     Tx_done <= '0';
     case CS is 
-        when Idle => 
-            
         when Load => 
             symbol_load <= '1';
-        When Transmit => 
-            length_cnt_en <= '1';
-        When Check => 
-            --Clr_length_cnt <= '1';
+        when Transmit => 
+           length_cnt_en <= '1';
         when Done => 
             tx_done <= '1';
         when Others => 
