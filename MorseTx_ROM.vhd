@@ -21,15 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+use IEEE.NUMERIC_STD.ALL;
 
 entity Transmitter_with_ROM is
     Port ( 
@@ -47,16 +39,13 @@ type state_type is (Idle, Load, Transmit, Check, Done);
 signal CS, NS : State_type := Idle;
 
 --FSM signals 
-Signal transmit_en : Std_Logic := '0';
-Signal Queue_empty : Std_Logic := '0';
 Signal symbol_load : Std_Logic := '0';
 signal length_TC : STD_Logic := '0';
 Signal Length_cnt_en  : Std_Logic := '0';
 Signal Tx_done : Std_Logic := '0';
 
 -- ROM signals 
-signal ascii_char : STD_Logic_vector(7 downto 0);
-Signal Morse_code : std_logic_vector(19 downto 0);
+Signal Morse_code : std_logic_vector(20 downto 0);
 signal Morse_Code_Length : integer := 0;
 
 -- Datapath signals
@@ -64,26 +53,25 @@ constant BAUD_PERIOD : integer := 400;
 signal new_bit : std_logic := '0'; 
 signal baud_tc : std_logic := '0';
 signal bit_count : integer := 0;
-signal data_register : std_logic_vector(19 downto 0) := (others => '0');
+signal data_register : std_logic_vector(20 downto 0) := (others => '0');
 signal baud_count: unsigned(8 downto 0) := (others => '0');
 
-begin
-
+begin 
 -------------------
 -- Baud counter 
 -------------------
 baud_counter: process(clk_port, baud_count)
 begin
-    if rising_edge(clk_port) then 
+    if rising_edge(clk_port) then
         baud_count <= baud_count + 1;
         if symbol_load = '1' or baud_tc = '1' then   
             baud_count <= (others => '0'); 
         end if;
     end if; 
 
-    baud_tc <= '0';
+    new_bit <= '0';
     if baud_count = BAUD_PERIOD-1 then
-        baud_tc <= '1';
+        new_bit <= '1';
     end if;
 end process; 
 
@@ -92,9 +80,6 @@ begin
     if rising_edge(clk_port) then 
         if new_bit = '1' and Length_cnt_en = '1' then 
             bit_count <= bit_count - 1; 
-        end if; 
-        if symbol_load = '1' or length_tc = '1' then 
-            bit_count <= (others => '0'); 
         end if; 
     end if; 
 
@@ -108,11 +93,11 @@ begin
     end if;
 end process; 
 
-shift_register: process(clk_port)
+shift_register: process(clk_port, symbol_load)
 begin
     if rising_edge(clk_port) then 
         if new_bit = '1' then 
-            data_register <= data_register(18 downto 0) & '0'; 
+            data_register <= data_register(19 downto 0) & '0'; 
         end if;
     end if; 
 
@@ -121,7 +106,7 @@ begin
     end if;
 end process;
 
-tx <= data_register(19); 
+tx <= data_register(20); 
 
 
 -------------------
@@ -130,7 +115,7 @@ tx <= data_register(19);
 state_update : process(clk_port) 
 begin 
     if rising_edge(clk_port) then
-        NS <= CS;
+        CS <= NS;
     end if;
 end process;
 
@@ -144,6 +129,7 @@ begin
                 NS <= Load;
             end if;
         when Load => 
+        	
             NS <= Transmit;
         when Transmit => 
             if Length_TC = '1' then 
@@ -183,13 +169,13 @@ end process;
 ----------------------------------------
 --ROM 
 ----------------------------------------
-ROM : Process(Queue_empty, ascii_char)
+ROM : Process(Queue_empty, data_in)
 begin 
     Morse_code <= "000000000000000000000";
     Morse_code_length <= 0;
     
     if Queue_empty = '0' then 
-        case to_integer(unsigned(ascii_char)) is 
+        case to_integer(unsigned(data_in)) is 
         -- 0 through 9
             When 48 => 
                 Morse_Code <= "111011101110111011100";
@@ -299,23 +285,9 @@ begin
                 Morse_code_length <= 12;
             when 90 => 
                 Morse_code <= "111011101010000000000";
-                Morse_code_length <= 4;
-            When Others => 
-            
+                Morse_code_length <= 4; 
+            when others => 
         end case;
     end if;
 end process;
-
-
-
-
-
-
-
-
-
-            
-            
-  
-
 end Behavioral;
