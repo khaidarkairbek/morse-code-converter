@@ -23,7 +23,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity Transmitter_with_ROM is
+entity MorseTx_ROM is
     Port ( 
         data_in : in std_logic_vector(7 downto 0);
         transmit_en : in std_logic; 
@@ -31,9 +31,9 @@ entity Transmitter_with_ROM is
         clk_port : in STD_Logic;
         tx: out std_logic; 
         );
-end Transmitter_with_ROM;
+end MorseTx_ROM;
 
-architecture Behavioral of Transmitter_with_ROM is
+architecture Behavioral of MorseTx_ROM is
 --FSM states 
 type state_type is (Idle, Load, Transmit, Check, Done);
 signal CS, NS : State_type := Idle;
