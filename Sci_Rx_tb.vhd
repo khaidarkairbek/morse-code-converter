@@ -1,3 +1,11 @@
+----------------------------------------------------------------------------------
+-- Company: Dartmouth College
+-- Engineers: Khaidar Kairbek and Collin Kuester
+-- Module Name: Sci_Receiver - Testbench
+-- Project Name: Morse Code Converter 
+-- Target Device: Basys 3
+-- Description: SCI Receiver
+----------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
@@ -10,7 +18,7 @@ ARCHITECTURE testbench OF Sci_RX_tb IS
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT Sci_RX
     PORT(
-        clk_port : in STD_Logic;
+        clk : in STD_Logic;
         rx : in std_logic;
         sci_ready : out std_logic;
         sci_output : out std_logic_vector(7 downto 0);
@@ -18,7 +26,7 @@ ARCHITECTURE testbench OF Sci_RX_tb IS
     END COMPONENT;
     
     --Inputs
-    signal clk     : std_logic := '0';
+    signal clk : std_logic := '0';
     signal rx : std_logic := '1';
 
     --Outputs
@@ -35,7 +43,7 @@ BEGIN
         rx => rx,
         sci_output => sci_output, 
         sci_ready => sci_ready, 
-        clk_port => clk);
+        clk => clk);
 
     -- Clock process definitions
     clk_process :process

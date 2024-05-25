@@ -1,21 +1,10 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 05/22/2024 08:37:32 PM
--- Design Name: 
--- Module Name: Transmitter_with_ROM - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
+-- Company: Dartmouth College
+-- Engineers: Khaidar Kairbek and Collin Kuester
+-- Module Name: MorseTx - Behavioral
+-- Project Name: Morse Code Converter 
+-- Target Device: Basys 3
+-- Description: Morse Transmitter 
 ----------------------------------------------------------------------------------
 
 
@@ -23,26 +12,25 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity MorseTx_ROM is
+entity Morse_Tx_ROM is
     Port ( 
         data_in : in std_logic_vector(7 downto 0);
         transmit_en : in std_logic; 
         queue_empty: in std_logic; 
-        clk_port : in STD_Logic;
+        clk : in std_logic;
         tx: out std_logic; 
-        );
-end MorseTx_ROM;
+        tx_done: out std_logic);
+end Morse_Tx_ROM;
 
-architecture Behavioral of MorseTx_ROM is
+architecture Behavioral of Morse_Tx_ROM is
 --FSM states 
 type state_type is (Idle, Load, Transmit, Check, Done);
-signal CS, NS : State_type := Idle;
+signal CS, NS : state_type := Idle;
 
 --FSM signals 
-Signal symbol_load : Std_Logic := '0';
-signal length_TC : STD_Logic := '0';
-Signal Length_cnt_en  : Std_Logic := '0';
-Signal Tx_done : Std_Logic := '0';
+Signal symbol_load : std_logic := '0';
+signal length_tc : std_logic := '0';
+Signal length_cnt_en  : Std_Logic := '0';
 
 -- ROM signals 
 Signal Morse_code : std_logic_vector(20 downto 0);
@@ -52,50 +40,50 @@ signal Morse_Code_Length : integer := 0;
 constant BAUD_PERIOD : integer := 400;
 signal new_bit : std_logic := '0'; 
 signal baud_tc : std_logic := '0';
-signal bit_count : integer := 0;
+signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(20 downto 0) := (others => '0');
-signal baud_count: unsigned(8 downto 0) := (others => '0');
+signal baud_cnt: unsigned(8 downto 0) := (others => '0');
 
 begin 
 -------------------
 -- Baud counter 
 -------------------
-baud_counter: process(clk_port, baud_count)
+baud_counter: process(clk, baud_cnt)
 begin
-    if rising_edge(clk_port) then
-        baud_count <= baud_count + 1;
+    if rising_edge(clk) then
+        baud_cnt <= baud_cnt + 1;
         if symbol_load = '1' or baud_tc = '1' then   
-            baud_count <= (others => '0'); 
+            baud_cnt <= (others => '0'); 
         end if;
     end if; 
 
     new_bit <= '0';
-    if baud_count = BAUD_PERIOD-1 then
+    if baud_cnt = BAUD_PERIOD-1 then
         new_bit <= '1';
     end if;
 end process; 
 
-bit_counter: process(clk_port, bit_count, symbol_load)
+bit_counter: process(clk, bit_cnt, symbol_load)
 begin
-    if rising_edge(clk_port) then 
+    if rising_edge(clk) then 
         if new_bit = '1' and Length_cnt_en = '1' then 
-            bit_count <= bit_count - 1; 
+            bit_cnt <= bit_cnt - 1; 
         end if; 
     end if; 
 
     length_tc <= '0'; 
-    if bit_count = 0 then 
+    if bit_cnt = 0 then 
         length_tc <= '1'; 
     end if; 
 
     if symbol_load = '1' then 
-        bit_count <= Morse_code_length; 
+        bit_cnt <= Morse_code_length; 
     end if;
 end process; 
 
-shift_register: process(clk_port, symbol_load)
+shift_register: process(clk, symbol_load)
 begin
-    if rising_edge(clk_port) then 
+    if rising_edge(clk) then 
         if new_bit = '1' then 
             data_register <= data_register(19 downto 0) & '0'; 
         end if;
@@ -112,15 +100,15 @@ tx <= data_register(20);
 -------------------
 --FSM LOGIC 
 -------------------
-state_update : process(clk_port) 
+state_update : process(clk) 
 begin 
-    if rising_edge(clk_port) then
+    if rising_edge(clk) then
         CS <= NS;
     end if;
 end process;
 
 
-NS_Logic : process(CS, Queue_empty, transmit_en, length_TC)
+NS_Logic : process(CS, queue_empty, transmit_en, length_tc)
 begin
     NS <= CS;
     case CS is 
@@ -129,22 +117,20 @@ begin
                 NS <= Load;
             end if;
         when Load => 
-        	
             NS <= Transmit;
         when Transmit => 
-            if Length_TC = '1' then 
+            if length_tc = '1' then 
                 NS <= Check;
             end if; 
         when Check => 
-            if Queue_empty = '1' then 
+            if queue_empty = '1' then 
                 NS <= Done;
-            elsif Queue_empty = '0' then 
+            elsif queue_empty = '0' then 
                 NS <= Load;
             end if;
         when Done => 
             NS <= Idle; 
         when Others => 
-        
     end case; 
 end process;
 
@@ -152,8 +138,8 @@ end process;
 Output_Logic : Process(CS)
 begin 
     symbol_load <= '0';
-    Length_cnt_en <= '0';
-    Tx_done <= '0';
+    length_cnt_en <= '0';
+    tx_done <= '0';
     case CS is 
         when Load => 
             symbol_load <= '1';
@@ -169,7 +155,7 @@ end process;
 ----------------------------------------
 --ROM 
 ----------------------------------------
-ROM : Process(Queue_empty, data_in)
+ROM : Process(queue_empty, data_in)
 begin 
     Morse_code <= "000000000000000000000";
     Morse_code_length <= 0;
