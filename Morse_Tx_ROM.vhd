@@ -165,7 +165,7 @@ begin
         -- 0 through 9
             When 48 => 
                 Morse_Code <= "111011101110111011100";
-                Morse_code_length <= 18;
+                Morse_code_length <= 19;
             when 49 => 
                 Morse_code <= "101110111011101110000";
                 Morse_code_length <= 16; 

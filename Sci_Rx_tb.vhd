@@ -21,8 +21,7 @@ ARCHITECTURE testbench OF Sci_RX_tb IS
         clk : in STD_Logic;
         rx : in std_logic;
         sci_ready : out std_logic;
-        sci_output : out std_logic_vector(7 downto 0);
-    );
+        sci_output : out std_logic_vector(7 downto 0));
     END COMPONENT;
     
     --Inputs
