@@ -1,3 +1,11 @@
+----------------------------------------------------------------------------------
+-- Company: Dartmouth College
+-- Engineers: Khaidar Kairbek and Collin Kuester
+-- Module Name: Queue - Behavioral
+-- Project Name: Morse Code Converter 
+-- Target Device: Basys 3
+-- Description: Queue Memory
+----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
