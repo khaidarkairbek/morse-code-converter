@@ -13,11 +13,8 @@ USE ieee.numeric_std.ALL;
 
 ENTITY Morse_TX_ROM_tb IS
 END Morse_TX_ROM_tb;
-ENTITY Morse_Tx_ROM_tb IS
-END Morse_Tx_ROM_tb;
 
-ARCHITECTURE testbench OF Morse_TX_ROM_tb IS 
-ARCHITECTURE testbench OF Morse_Tx_ROM_tb IS 
+ARCHITECTURE testbench OF Morse_TX_ROM_tb IS
 
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT Morse_Tx_ROM
@@ -104,7 +101,7 @@ BEGIN
         transmit_en <= '1';  -- Load the data
 
         -- Wait for transmission to complete 
-        wait for clk_period * 4000;
+        wait for clk_period * 10000;
         wait;
     end process;
 

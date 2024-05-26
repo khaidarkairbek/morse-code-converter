@@ -43,9 +43,9 @@ signal data_register : std_logic_vector(9 downto 0) := (others => '0');
 
 begin
 
-baud_counter: process(clk_port, baud_cnt)
+baud_counter: process(clk, baud_cnt)
 begin
-	if rising_edge(clk_port) then
+	if rising_edge(clk) then
     	if baud_cnt_en = '1' then 
         	baud_cnt <= baud_cnt + 1;
         end if; 
@@ -66,9 +66,9 @@ begin
     end if;
 end process; 
 
-bit_counter: process(clk_port, bit_cnt)
+bit_counter: process(clk, bit_cnt)
 begin
-	if rising_edge(clk_port) then
+	if rising_edge(clk) then
     	if bit_cnt_en = '1' and half_baud_tc = '1' then 
         	bit_cnt <= bit_cnt + 1; 
         end if;
@@ -85,9 +85,9 @@ begin
     end if;
 end process;
 
-shift_register: process(clk_port)
+shift_register: process(clk)
 begin
-    if rising_edge(clk_port) then 
+    if rising_edge(clk) then 
         if half_baud_tc = '1' then 
             data_register <= data_register(8 downto 0) & rx; 
         end if;
@@ -100,9 +100,9 @@ sci_output <= data_register(8 downto 1);
 --FSM Logic 
 ----------------------------------------
 
-state_update : process(clk_port)
+state_update : process(clk)
 begin
-    if rising_edge(clk_port) then
+    if rising_edge(clk) then
         CS <= NS;
     end if;
 end process;

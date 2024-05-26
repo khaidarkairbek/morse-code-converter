@@ -40,8 +40,7 @@ signal Morse_Code_Length : integer := 0;
 
 -- Datapath signals
 constant BAUD_PERIOD : integer := 400;
-signal new_bit : std_logic := '0'; 
-signal baud_tc : std_logic := '0';
+signal new_bit : std_logic := '0';
 signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(20 downto 0) := (others => '0');
 signal baud_cnt: unsigned(8 downto 0) := (others => '0');
@@ -54,7 +53,7 @@ baud_counter: process(clk, baud_cnt)
 begin
     if rising_edge(clk) then
         baud_cnt <= baud_cnt + 1;
-        if rom_read = '1' or baud_tc = '1' then   
+        if rom_read = '1' or new_bit = '1' then   
             baud_cnt <= (others => '0'); 
         end if;
     end if; 
