@@ -80,7 +80,7 @@ begin
     
     -- asynchronous bit count TC
     bit_tc <= '0'; 
-    if bit_cnt = 10 then 
+    if bit_cnt = 9 then 
     	bit_tc <= '1'; 
     end if;
 end process;

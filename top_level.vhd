@@ -77,7 +77,7 @@ signal queue_empty : std_logic := '0';
 signal queue_full : std_logic := '0'; 
 signal sci_done_tc : std_logic := '0'; 
 signal sci_done_cnt : integer := 0; 
-constant SCI_INACTIVE_THRESHOLD : integer := 800; 
+constant SCI_INACTIVE_THRESHOLD : integer := 16000; 
 
 -- FSM Signals 
 type state_type is (Receive, Transmit);
@@ -191,5 +191,5 @@ begin
     end if; 
 end process; 
 
-rx_done <= sci_done_tc or queue_full; 
+rx_done <= (sci_done_tc or queue_full) and (not queue_empty); 
 end Behavioral; 

@@ -21,8 +21,7 @@ port(
     clk_ext_port        : in  std_logic;
     sci_data_ext_port   : in  std_logic;
     morse_tx_ext_port   : out  std_logic;
-    morse_tx_done_ext_port  : out std_logic;
-);
+    morse_tx_done_ext_port  : out std_logic);
 end component;
 
 -- Inputs
@@ -35,8 +34,7 @@ signal tx_done : std_logic;
 
 -- Clock period definitions
 constant clk_period : time := 100 ns;  -- Assuming a 10 MHz clock
-signal data : std_logic_vector(7 downto 0) := (others => '1');
-    
+signal data : std_logic_vector(9 downto 0) := (others => '1');
     
     
 begin
@@ -55,11 +53,14 @@ begin
         wait for clk_period/2;
     end process;
     
-    data_send_process : process 
-    begin 
-    	data <= "00110000";
-        sci_data <= '0'; 
+    data_send_process : process
+    begin
+        wait for 1000 * clk_period; 
+        data <= '0' & "00110000" & '1';
+        sci_data <= data(9); 
         wait for 392 * clk_period; 
+        sci_data <= data(8);
+        wait for 392 * clk_period;
         sci_data <= data(7);
         wait for 392 * clk_period; 
         sci_data <= data(6);
@@ -78,7 +79,7 @@ begin
         wait for 392 * clk_period;
         sci_data <= '1';
         wait for 392 * clk_period;
-        wait for 10000 * clk_period;
+        wait;
     end process; 
 
 END testbench;
