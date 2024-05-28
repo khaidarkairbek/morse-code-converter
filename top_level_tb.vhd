@@ -35,6 +35,33 @@ signal tx_done : std_logic;
 -- Clock period definitions
 constant clk_period : time := 100 ns;  -- Assuming a 10 MHz clock
 signal data : std_logic_vector(9 downto 0) := (others => '1');
+type my_array is array (0 to 23) of std_logic_vector(7 downto 0);
+signal test_case_id : integer := 0;
+signal test_case : my_array := (
+    "01001011", --k
+    "01001000",--h
+    "01000001",--a
+    "01001001",--i
+    "01000100",--d
+    "01000001",--a
+    "01010010",--r
+    "00100000",--space
+    "01000011",--c
+    "01001111",--o
+    "01001100",--l
+    "01001100",--l
+    "01001001",--i
+    "01001110",--n
+    "00100000",--space
+    "01010000",--p
+    "01001100",--l
+    "01000001",--a
+    "01011001",--y
+    "00100000",--space
+    "01000010",--b
+    "01000001",--a
+    "01001100",--l
+    "01001100");--l
     
     
 begin
@@ -56,7 +83,8 @@ begin
     data_send_process : process
     begin
         wait for 1000 * clk_period; 
-        data <= '0' & "00110000" & '1';
+        data <= '0' & test_case(test_case_id) & '1';
+        wait for 5 * clk_period; 
         sci_data <= data(9); 
         wait for 392 * clk_period; 
         sci_data <= data(8);
@@ -79,7 +107,11 @@ begin
         wait for 392 * clk_period;
         sci_data <= '1';
         wait for 392 * clk_period;
-        wait;
+        test_case_id <= test_case_id + 1;
+        wait for 10*clk_period;
+        if test_case_id = 24 then
+            wait;
+        end if;
     end process; 
 
 END testbench;

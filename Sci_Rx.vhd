@@ -16,6 +16,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity Sci_RX is
   Port ( 
+    receive_en : in std_logic; 
   	clk : in STD_Logic;
   	rx : in std_logic;
     sci_ready : out std_logic;
@@ -73,14 +74,14 @@ begin
         	bit_cnt <= bit_cnt + 1; 
         end if;
         
-        if bit_cnt_en = '0' then 
+        if bit_cnt_en = '0' or bit_tc = '1' then 
         	bit_cnt <= 0;
         end if; 
     end if; 
     
     -- asynchronous bit count TC
     bit_tc <= '0'; 
-    if bit_cnt = 9 then 
+    if bit_cnt = 10 then 
     	bit_tc <= '1'; 
     end if;
 end process;
@@ -115,7 +116,9 @@ begin
                 NS <= Shift;
             end if;
         when Shift =>
-            if bit_tC = '1' then
+            if receive_en = '0' then 
+                NS <= Idle;
+            elsif bit_tC = '1' then
                 NS <= Ready;
             end if;
         when Ready =>

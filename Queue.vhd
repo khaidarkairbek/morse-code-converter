@@ -23,7 +23,7 @@ end Queue;
 
 architecture behavior of Queue is
 
-CONSTANT QUEUE_LENGTH : integer := 8;
+CONSTANT QUEUE_LENGTH : integer := 26;
 
 type regfile is array(0 to QUEUE_LENGTH-1) of STD_LOGIC_VECTOR(7 downto 0);
 signal Queue_reg : regfile := (others =>(others => '0'));

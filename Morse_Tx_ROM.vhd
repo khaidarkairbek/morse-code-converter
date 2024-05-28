@@ -35,14 +35,14 @@ Signal length_cnt_en  : std_Logic := '0';
 signal rom_read : std_logic := '0'; 
 
 -- ROM signals 
-Signal Morse_code : std_logic_vector(20 downto 0) := (others => '0');
+Signal Morse_code : std_logic_vector(21 downto 0) := (others => '0');
 signal Morse_Code_Length : integer := 0;
 
 -- Datapath signals
 constant BAUD_PERIOD : integer := 400;
 signal new_bit : std_logic := '0';
 signal bit_cnt : integer := 0;
-signal data_register : std_logic_vector(20 downto 0) := (others => '0');
+signal data_register : std_logic_vector(21 downto 0) := (others => '0');
 signal baud_cnt: unsigned(8 downto 0) := (others => '0');
 
 begin 
@@ -92,7 +92,7 @@ shift_register: process(clk, rom_read)
 begin
     if rising_edge(clk) then 
         if new_bit = '1' then 
-            data_register <= data_register(19 downto 0) & '0'; 
+            data_register <= data_register(20 downto 0) & '0'; 
         end if;
     end if; 
     
@@ -101,7 +101,7 @@ begin
     end if;
 end process;
 
-tx <= data_register(20); 
+tx <= data_register(21); 
 new_symbol <= symbol_load; 
 
 
@@ -172,124 +172,121 @@ ROM : process(clk)
 begin 
     if rising_edge(clk) then 
         case to_integer(unsigned(data_in)) is 
-            when 46 =>  -- space
-                Morse_Code <= "000000000000000000000"; 
-                Morse_code_length <= 2;   -- 3 0s between words, 1 is from prev symbol and 2 from space itself
-            when 46 =>   -- dot
-                Morse_Code <= "000000000000000000000"; 
-                Morse_code_length <= 4;   -- 7 0s between sentences i.e. dots are signal of sentence. followed by space  one zero from previous symbol, 2 zeros by following space and 4 zeros from the dot itself
-        -- 0 through 9
+            when 32 =>  -- space
+                Morse_Code <= "0000000000000000000000"; 
+                Morse_code_length <= 4;   -- 3 0s between words, 1 is from prev symbol and 2 from space itself
+            -- 0 through 9
             When 48 => 
-                Morse_Code <= "111011101110111011100";
-                Morse_code_length <= 20;
+                Morse_Code <= "1110111011101110111000";
+                Morse_code_length <= 22;
             when 49 => 
-                Morse_code <= "101110111011101110000";
-                Morse_code_length <= 18; 
+                Morse_code <= "1011101110111011100000";
+                Morse_code_length <= 20; 
             when 50 => 
-                Morse_code <= "101011101110111000000";
-                Morse_code_length <= 16; 
+                Morse_code <= "1010111011101110000000";
+                Morse_code_length <= 18; 
             when 51 => 
-                Morse_code <= "101010111011100000000";
-                Morse_code_length <= 14; 
+                Morse_code <= "1010101110111000000000";
+                Morse_code_length <= 16; 
             when 52 => 
-                Morse_code <= "101010101110000000000";
-                Morse_code_length <= 12;
-            when 53 => 
-                Morse_code <= "101010101000000000000";
-                Morse_code_length <= 10;
-            when 54 => 
-                Morse_code <= "111010101010000000000";
-                Morse_code_length <= 12;
-            when 55 => 
-                Morse_code <= "111011101010100000000";
+                Morse_code <= "1010101011100000000000";
                 Morse_code_length <= 14;
-            when 56 => 
-                Morse_code <= "111011101110101000000";
+            when 53 => 
+                Morse_code <= "1010101010000000000000";
+                Morse_code_length <= 12;
+            when 54 => 
+                Morse_code <= "1110101010100000000000";
+                Morse_code_length <= 14;
+            when 55 => 
+                Morse_code <= "1110111010101000000000";
                 Morse_code_length <= 16;
-            when 57 => 
-                Morse_code <= "111011101110111010000";
+            when 56 => 
+                Morse_code <= "1110111011101010000000";
                 Morse_code_length <= 18;
+            when 57 => 
+                Morse_code <= "1110111011101110100000";
+                Morse_code_length <= 20;
             -- A through Z 
             when 65 => 
-                Morse_code <= "101110000000000000000";
-                Morse_code_length <= 6;
+                Morse_code <= "1011100000000000000000";
+                Morse_code_length <= 8;
             when 66 => 
-                Morse_code <= "111010101000000000000";
-                Morse_code_length <= 10;
+                Morse_code <= "1110101010000000000000";
+                Morse_code_length <= 12;
             when 67 => 
-                Morse_code <= "111010111010000000000";
+                Morse_code <= "1110101110100000000000";
                 Morse_code_length <= 14;
             when 68 => 
-                Morse_code <= "111010100000000000000";
-                Morse_code_length <= 8;
+                Morse_code <= "1110101000000000000000";
+                Morse_code_length <= 10;
             when 69 => 
-                Morse_code <= "100000000000000000000";
-                Morse_code_length <= 2;
+                Morse_code <= "1000000000000000000000";
+                Morse_code_length <= 4;
             when 70 => 
-                Morse_code <= "101011101000000000000";
-                Morse_code_length <= 10;
+                Morse_code <= "1010111010000000000000";
+                Morse_code_length <= 12;
             when 71 => 
-                Morse_code <= "111011101000000000000";
-                Morse_code_length <= 10;
+                Morse_code <= "1110111010000000000000";
+                Morse_code_length <= 12;
             when 72 => 
-                Morse_code <= "101010100000000000000";
-                Morse_code_length <= 8;
+                Morse_code <= "1010101000000000000000";
+                Morse_code_length <= 10;
             when 73 => 
-                Morse_code <= "101000000000000000000";
-                Morse_code_length <= 4;
+                Morse_code <= "1010000000000000000000";
+                Morse_code_length <= 6;
             when 74 => 
-                Morse_code <= "101110111011100000000";
-                Morse_code_length <= 14;
+                Morse_code <= "1011101110111000000000";
+                Morse_code_length <= 16;
             when 75 => 
-                Morse_code <= "111010111000000000000";
-                Morse_code_length <= 10;
+                Morse_code <= "1110101110000000000000";
+                Morse_code_length <= 12;
             when 76 => 
-                Morse_code <= "101110101000000000000";
-                Morse_code_length <= 10;
+                Morse_code <= "1011101010000000000000";
+                Morse_code_length <= 12;
             when 77 => 
-                Morse_code <= "111011100000000000000";
-                Morse_code_length <= 8;
+                Morse_code <= "1110111000000000000000";
+                Morse_code_length <= 10;
             when 78 => 
-                Morse_code <= "111010000000000000000";
-                Morse_code_length <= 6;
+                Morse_code <= "1110100000000000000000";
+                Morse_code_length <= 8;
             when 79 => 
-                Morse_code <= "111011101110000000000";
-                Morse_code_length <= 12;
+                Morse_code <= "1110111011100000000000";
+                Morse_code_length <= 14;
             when 80 => 
-                Morse_code <= "101110111010000000000";
-                Morse_code_length <= 12;
+                Morse_code <= "1011101110100000000000";
+                Morse_code_length <= 14;
             when 81 => 
-                Morse_code <= "111011101011100000000";
-                Morse_code_length <= 14;
+                Morse_code <= "1110111010111000000000";
+                Morse_code_length <= 16;
             when 82 => 
-                Morse_code <= "101110100000000000000";
-                Morse_code_length <= 8;
+                Morse_code <= "1011101000000000000000";
+                Morse_code_length <= 10;
             when 83 => 
-                Morse_code <= "101010000000000000000";
-                Morse_code_length <= 6;
-            when 84 => 
-                Morse_code <= "111000000000000000000";
-                Morse_code_length <= 4;
-            when 85 => 
-                Morse_code <= "101011100000000000000";
+                Morse_code <= "1010100000000000000000";
                 Morse_code_length <= 8;
+            when 84 => 
+                Morse_code <= "1110000000000000000000";
+                Morse_code_length <= 6;
+            when 85 => 
+                Morse_code <= "1010111000000000000000";
+                Morse_code_length <= 10;
             when 86 => 
-                Morse_code <= "101010111000000000000";
-                Morse_code_length <= 10;
-            when 87 => 
-                Morse_code <= "101110111000000000000";
-                Morse_code_length <= 10;
-            when 88 => 
-                Morse_code <= "111010101110000000000";
+                Morse_code <= "1010101110000000000000";
                 Morse_code_length <= 12;
-            when 89 => 
-                Morse_code <= "111010111011100000000";
+            when 87 => 
+                Morse_code <= "1011101110000000000000";
+                Morse_code_length <= 12;
+            when 88 => 
+                Morse_code <= "1110101011100000000000";
                 Morse_code_length <= 14;
+            when 89 => 
+                Morse_code <= "1110101110111000000000";
+                Morse_code_length <= 16;
             when 90 => 
-                Morse_code <= "111011101010000000000";
-                Morse_code_length <= 6; 
+                Morse_code <= "1110111010100000000000";
+                Morse_code_length <= 8; 
             when others => 
-            	Morse_code <= "000000000000000000000";
+            	Morse_code <= "0000000000000000000000";
     			Morse_code_length <= 0;
         end case;
     end if;

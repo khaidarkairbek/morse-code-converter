@@ -28,6 +28,7 @@ architecture Behavioral of top_level is
 -------------------
 component Sci_Rx is 
     port(
+        receive_en : in std_logic;
         clk : in std_logic; 
         rx : in std_logic; 
         sci_ready : out std_logic; 
@@ -96,6 +97,7 @@ begin
 -------------------
 receiver: Sci_Rx
 port map(
+    receive_en => receive_en,
     clk  => clk_ext_port, 
     rx   => sci_data_ext_port, 
     sci_ready => sci_ready,
