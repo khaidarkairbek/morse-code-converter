@@ -18,6 +18,8 @@ ARCHITECTURE testbench OF Morse_TX_ROM_tb IS
 
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT Morse_Tx_ROM
+    generic(
+        BAUD_PERIOD : integer);
     PORT(
         data_in : in std_logic_vector(7 downto 0);
         transmit_en : in std_logic; 
@@ -48,7 +50,10 @@ ARCHITECTURE testbench OF Morse_TX_ROM_tb IS
 BEGIN
 
     -- Instantiate the Unit Under Test (UUT)
-    uut: Morse_Tx_ROM PORT MAP (
+    uut: Morse_Tx_ROM 
+    generic map (
+        BAUD_PERIOD => 400)
+    PORT MAP (
         data_in => Data_in,
         transmit_en => transmit_en, 
         queue_empty => empty, 

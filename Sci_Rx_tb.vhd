@@ -17,6 +17,8 @@ ARCHITECTURE testbench OF Sci_RX_tb IS
 
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT Sci_RX
+    generic(
+        BAUD_PERIOD : integer);
     PORT(
         clk : in STD_Logic;
         rx : in std_logic;
@@ -38,7 +40,10 @@ ARCHITECTURE testbench OF Sci_RX_tb IS
 BEGIN
 
     -- Instantiate the Unit Under Test (UUT)
-    uut: Sci_RX PORT MAP (
+    uut: Sci_RX 
+    generic map(
+    BAUD_PERIOD => 392)
+    PORT MAP (
         rx => rx,
         sci_output => sci_output, 
         sci_ready => sci_ready, 

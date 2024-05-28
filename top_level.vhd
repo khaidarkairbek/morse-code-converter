@@ -27,6 +27,8 @@ architecture Behavioral of top_level is
 -- SCI Receiver 
 -------------------
 component Sci_Rx is 
+    generic(
+        BAUD_PERIOD : integer);
     port(
         receive_en : in std_logic;
         clk : in std_logic; 
@@ -39,6 +41,8 @@ end component;
 -- Morse Transmitter
 -------------------
 component Morse_Tx_ROM is 
+    generic (
+        BAUD_PERIOD : integer);
     port ( 
         data_in : in std_logic_vector(7 downto 0);
         transmit_en : in std_logic; 
@@ -53,6 +57,8 @@ end component;
 -- Queue
 -------------------
 component Queue is 
+    generic (
+        QUEUE_LENGTH : integer);
     port (
         clk		:	in	STD_LOGIC; --10 MHz clock
 		Write	: 	in 	STD_LOGIC;
@@ -78,7 +84,9 @@ signal queue_empty : std_logic := '0';
 signal queue_full : std_logic := '0'; 
 signal sci_done_tc : std_logic := '0'; 
 signal sci_done_cnt : integer := 0; 
-constant SCI_INACTIVE_THRESHOLD : integer := 16000; 
+constant SCI_BAUD_PERIOD : integer := 10416;
+constant MORSE_BAUD_PERIOD : integer := 50000000;
+constant SCI_INACTIVE_THRESHOLD : integer := 50 * SCI_BAUD_PERIOD; 
 
 -- FSM Signals 
 type state_type is (Receive, Transmit);
@@ -96,6 +104,8 @@ begin
 -- SCI Receiver 
 -------------------
 receiver: Sci_Rx
+generic map(
+    BAUD_PERIOD => SCI_BAUD_PERIOD)
 port map(
     receive_en => receive_en,
     clk  => clk_ext_port, 
@@ -107,6 +117,8 @@ port map(
 -- Morse Transmitter
 -------------------
 transmitter: Morse_Tx_ROM
+generic map(
+    BAUD_PERIOD => MORSE_BAUD_PERIOD)
 port map(
     data_in => queue_output, 
     transmit_en => transmit_en, 
@@ -122,6 +134,8 @@ morse_tx_done_ext_port <= tx_done;
 -- Queue
 -------------------
 queue_mem: Queue
+generic map(
+    QUEUE_LENGTH => 64)
 port map(
     clk => clk_ext_port, 
     write => sci_ready,

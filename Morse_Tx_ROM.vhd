@@ -13,6 +13,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity Morse_Tx_ROM is
+    generic (
+        BAUD_PERIOD : integer);
     Port ( 
         data_in : in std_logic_vector(7 downto 0);
         transmit_en : in std_logic; 
@@ -39,7 +41,6 @@ Signal Morse_code : std_logic_vector(21 downto 0) := (others => '0');
 signal Morse_Code_Length : integer := 0;
 
 -- Datapath signals
-constant BAUD_PERIOD : integer := 400;
 signal new_bit : std_logic := '0';
 signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(21 downto 0) := (others => '0');

@@ -15,6 +15,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity Sci_RX is
+  generic(
+    BAUD_PERIOD : integer);
   Port ( 
     receive_en : in std_logic; 
   	clk : in STD_Logic;
@@ -33,8 +35,7 @@ signal baud_cnt_en : std_logic := '0';
 Signal bit_cnt_en : std_logic := '0';
 
 -- Datapath signals
-constant BAUD_PERIOD : integer := 392;
-constant HALF_BAUD_PERIOD : integer := 196;
+constant HALF_BAUD_PERIOD : integer := BAUD_PERIOD / 2;
 signal baud_cnt: unsigned(8 downto 0) := (others => '0');
 signal baud_tc : std_logic := '0';
 signal half_baud_tc : std_logic := '0';

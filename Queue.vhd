@@ -11,6 +11,8 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 ENTITY Queue IS
+generic (
+        QUEUE_LENGTH  : integer);
 PORT ( 	clk		:	in	STD_LOGIC; --10 MHz clock
 		Write	: 	in 	STD_LOGIC;
 		Read	: 	in 	STD_LOGIC;
@@ -22,8 +24,6 @@ end Queue;
 
 
 architecture behavior of Queue is
-
-CONSTANT QUEUE_LENGTH : integer := 26;
 
 type regfile is array(0 to QUEUE_LENGTH-1) of STD_LOGIC_VECTOR(7 downto 0);
 signal Queue_reg : regfile := (others =>(others => '0'));

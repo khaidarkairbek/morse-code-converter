@@ -33,7 +33,8 @@ signal tx       : std_logic;
 signal tx_done : std_logic;
 
 -- Clock period definitions
-constant clk_period : time := 100 ns;  -- Assuming a 10 MHz clock
+constant clk_period : time := 10 ns;  -- Assuming a 10 MHz clock
+constant SCI_BAUD_PERIOD : integer := 392;
 signal data : std_logic_vector(9 downto 0) := (others => '1');
 type my_array is array (0 to 23) of std_logic_vector(7 downto 0);
 signal test_case_id : integer := 0;
@@ -86,27 +87,27 @@ begin
         data <= '0' & test_case(test_case_id) & '1';
         wait for 5 * clk_period; 
         sci_data <= data(9); 
-        wait for 392 * clk_period; 
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(8);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(7);
-        wait for 392 * clk_period; 
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(6);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(5);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(4);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(3);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(2);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(1);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= data(0);
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         sci_data <= '1';
-        wait for 392 * clk_period;
+        wait for SCI_BAUD_PERIOD * clk_period; 
         test_case_id <= test_case_id + 1;
         wait for 10*clk_period;
         if test_case_id = 24 then
