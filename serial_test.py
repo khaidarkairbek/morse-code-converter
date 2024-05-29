@@ -4,7 +4,7 @@ import time
 def send_data(serial_port, baud_rate, data):
     try:
         # Open serial port
-        ser = serial.Serial(serial_port, baud_rate, timeout=1)
+        ser = serial.Serial(serial_port, baud_rate )
         time.sleep(2)  # Wait for the serial connection to initialize
 
         # Send data
@@ -25,7 +25,7 @@ def send_data(serial_port, baud_rate, data):
 
 if __name__ == "__main__":
     # Example usage
-    serial_port = "COM7"  # Replace with your serial port
+    serial_port = "COM1"  # Replace with your serial port
     baud_rate = 9600
     data = "KHAIDAR COLLIN PLAY BALL"  # Replace with your data
 

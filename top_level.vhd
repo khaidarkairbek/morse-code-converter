@@ -17,7 +17,10 @@ port(
     sci_data_ext_port : in std_logic; 
 
     morse_tx_ext_port : out std_logic; 
-    morse_tx_done_ext_port : out std_logic); 
+    morse_tx_done_ext_port : out std_logic; 
+    sci_tx_ext_port : out std_logic; 
+    receive_en_ext_port : out std_logic;
+    transmit_en_ext_port : out std_logic); 
 end top_level;
 
 
@@ -85,7 +88,7 @@ signal queue_full : std_logic := '0';
 signal sci_done_tc : std_logic := '0'; 
 signal sci_done_cnt : integer := 0; 
 constant SCI_BAUD_PERIOD : integer := 10416;
-constant MORSE_BAUD_PERIOD : integer := 50000000;
+constant MORSE_BAUD_PERIOD : integer := 10416;
 constant SCI_INACTIVE_THRESHOLD : integer := 50 * SCI_BAUD_PERIOD; 
 
 -- FSM Signals 
@@ -208,4 +211,7 @@ begin
 end process; 
 
 rx_done <= (sci_done_tc or queue_full) and (not queue_empty); 
+receive_en_ext_port <= receive_en;
+transmit_en_ext_port <= transmit_en;
+sci_tx_ext_port <= sci_data_ext_port;
 end Behavioral; 

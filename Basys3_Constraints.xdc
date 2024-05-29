@@ -44,10 +44,10 @@ set_property PACKAGE_PIN W5 [get_ports clk_ext_port]
  
 
 ## LEDs
-set_property PACKAGE_PIN U16 [get_ports morse_tx_ext_port]					
-	set_property IOSTANDARD LVCMOS33 [get_ports morse_tx_ext_port]
-#set_property PACKAGE_PIN E19 [get_ports {led[1]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {led[1]}]
+#set_property PACKAGE_PIN U16 [get_ports morse_tx_ext_port]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports morse_tx_ext_port]
+set_property PACKAGE_PIN E19 [get_ports receive_en_ext_port]					
+	set_property IOSTANDARD LVCMOS33 [get_ports receive_en_ext_port]
 #set_property PACKAGE_PIN U19 [get_ports {led[2]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {led[2]}]
 #set_property PACKAGE_PIN V19 [get_ports {led[3]}]					
@@ -72,8 +72,8 @@ set_property PACKAGE_PIN U16 [get_ports morse_tx_ext_port]
 	#set_property IOSTANDARD LVCMOS33 [get_ports {led[12]}]
 #set_property PACKAGE_PIN N3 [get_ports {led[13]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {led[13]}]
-#set_property PACKAGE_PIN P1 [get_ports {led[14]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {led[14]}]
+set_property PACKAGE_PIN P1 [get_ports transmit_en_ext_port]					
+	set_property IOSTANDARD LVCMOS33 [get_ports transmit_en_ext_port]
 set_property PACKAGE_PIN L1 [get_ports morse_tx_done_ext_port]					
 	set_property IOSTANDARD LVCMOS33 [get_ports morse_tx_done_ext_port]
 	
@@ -149,11 +149,11 @@ set_property PACKAGE_PIN L1 [get_ports morse_tx_done_ext_port]
 
 ##Pmod Header JB
 ##Sch name = JB1
-#set_property PACKAGE_PIN A14 [get_ports {JB[0]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JB[0]}]
+set_property PACKAGE_PIN A14 [get_ports morse_tx_ext_port]					
+	set_property IOSTANDARD LVCMOS33 [get_ports morse_tx_ext_port]
 ##Sch name = JB2
-#set_property PACKAGE_PIN A16 [get_ports {JB[1]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JB[1]}]
+set_property PACKAGE_PIN A16 [get_ports sci_tx_ext_port]					
+	set_property IOSTANDARD LVCMOS33 [get_ports sci_tx_ext_port]
 ##Sch name = JB3
 #set_property PACKAGE_PIN B15 [get_ports {JB[2]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {JB[2]}]
@@ -260,10 +260,10 @@ set_property PACKAGE_PIN L1 [get_ports morse_tx_done_ext_port]
 
 
 ##USB-RS232 Interface
-#set_property PACKAGE_PIN B18 [get_ports sci_data_ext_port]						
-	#set_property IOSTANDARD LVCMOS33 [get_ports sci_data_ext_port]
-set_property PACKAGE_PIN A18 [get_ports sci_data_ext_port]						
+set_property PACKAGE_PIN B18 [get_ports sci_data_ext_port]						
 	set_property IOSTANDARD LVCMOS33 [get_ports sci_data_ext_port]
+#set_property PACKAGE_PIN A18 [get_ports sci_data_ext_port]						
+	#set_property IOSTANDARD LVCMOS33 [get_ports sci_data_ext_port]
 
 
 ##USB HID (PS/2)

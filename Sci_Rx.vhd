@@ -36,7 +36,7 @@ Signal bit_cnt_en : std_logic := '0';
 
 -- Datapath signals
 constant HALF_BAUD_PERIOD : integer := BAUD_PERIOD / 2;
-signal baud_cnt: unsigned(8 downto 0) := (others => '0');
+signal baud_cnt: integer := 0;
 signal baud_tc : std_logic := '0';
 signal half_baud_tc : std_logic := '0';
 signal bit_tc : std_logic := '0';
@@ -52,7 +52,7 @@ begin
         	baud_cnt <= baud_cnt + 1;
         end if; 
         if baud_tc = '1' or baud_cnt_en = '0' then   --resets the count when tc
-            baud_cnt <= (others => '0');
+            baud_cnt <= 0;
         end if;
     end if; 
     
@@ -91,7 +91,7 @@ shift_register: process(clk)
 begin
     if rising_edge(clk) then 
         if half_baud_tc = '1' then 
-            data_register <= data_register(8 downto 0) & rx; 
+            data_register <= rx & data_register(9 downto 1); 
         end if;
     end if; 
 end process;
