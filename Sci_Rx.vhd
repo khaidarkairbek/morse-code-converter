@@ -104,13 +104,14 @@ sci_output <= data_register(8 downto 1);
 
 state_update : process(clk)
 begin
-    if rising_edge(clk) then
+    if (rising_edge(clk)) then
         CS <= NS;
     end if;
 end process;
 
-NS_Logic : process(CS, rx, bit_tc)
+NS_Logic : process(CS, rx, receive_en, bit_tc)
 begin
+    NS <= CS; 
     case CS is 
         when Idle => 
             if rx = '0' then
@@ -141,7 +142,7 @@ begin
         when Shift =>
             baud_cnt_en <= '1';
             bit_cnt_en <= '1';
-        when Others => 
+        when Others => null;
     end case;
 end process;    
 

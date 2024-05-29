@@ -43,7 +43,7 @@ signal Morse_Code_Length : integer := 0;
 -- Datapath signals
 signal new_bit : std_logic := '0';
 signal bit_cnt : integer := 0;
-signal data_register : std_logic_vector(21 downto 0) := (others => '0');
+signal data_register : std_logic_vector(21 downto 0) :=(others => '0');
 signal baud_cnt: integer := 0;
 
 begin 
@@ -68,17 +68,13 @@ end process;
 -------------------
 -- Bit counter 
 -------------------
-bit_counter: process(clk, bit_cnt, rom_read)
+bit_counter: process(clk, bit_cnt)
 begin
     if rising_edge(clk) then 
         if new_bit = '1' and Length_cnt_en = '1' then 
             bit_cnt <= bit_cnt - 1; 
         end if; 
     end if; 
-    
-    if rom_read = '1' then 
-        bit_cnt <= Morse_code_length; 
-    end if;
     
     length_tc <= '0'; 
     if bit_cnt = 0 then 
@@ -89,17 +85,13 @@ end process;
 -------------------
 -- Shift Register 
 -------------------
-shift_register: process(clk, rom_read)
+shift_register: process(clk)
 begin
     if rising_edge(clk) then 
         if new_bit = '1' then 
             data_register <= data_register(20 downto 0) & '0'; 
         end if;
     end if; 
-    
-    if rom_read = '1' then 
-       data_register <= Morse_code; 
-    end if;
 end process;
 
 tx <= data_register(21); 
@@ -141,7 +133,7 @@ begin
             end if;
         when Done => 
             NS <= Idle; 
-        when Others => 
+        when Others => null;
     end case; 
 end process;
 
@@ -161,7 +153,7 @@ begin
            length_cnt_en <= '1';
         when Done => 
             tx_done <= '1';
-        when Others => 
+        when Others => null;
     end case;
 end process;
 
@@ -169,9 +161,8 @@ end process;
 ----------------------------------------
 --ROM 
 ----------------------------------------
-ROM : process(clk)
+ROM : process(data_in)
 begin 
-    if rising_edge(clk) then 
         case to_integer(unsigned(data_in)) is 
             when 32 =>  -- space
                 Morse_Code <= "0000000000000000000000"; 
@@ -290,6 +281,7 @@ begin
             	Morse_code <= "0000000000000000000000";
     			Morse_code_length <= 0;
         end case;
-    end if;
+        bit_cnt <= Morse_code_length;
+        data_register <= Morse_code;
 end process;
 end Behavioral;

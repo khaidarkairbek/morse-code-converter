@@ -26,6 +26,18 @@ end top_level;
 
 architecture Behavioral of top_level is 
 
+---------------------------
+--System Clock Generation:
+---------------------------
+component system_clock_generator is
+	generic (
+	   CLOCK_DIVIDER_RATIO : integer);
+    port (
+        input_clk_port		: in  std_logic;
+        system_clk_port	    : out std_logic;
+		fwd_clk_port		: out std_logic);
+end component;
+
 -------------------
 -- SCI Receiver 
 -------------------
@@ -76,6 +88,7 @@ end component;
 ----------------------------
 -- Local Signal Declarations
 ----------------------------
+signal system_clk : std_logic := '0';
 signal rx_done : std_logic := '0'; 
 signal sci_ready : std_logic := '0';
 signal sci_output : std_logic_vector(7 downto 0) := (others => '0'); 
@@ -87,8 +100,8 @@ signal queue_empty : std_logic := '0';
 signal queue_full : std_logic := '0'; 
 signal sci_done_tc : std_logic := '0'; 
 signal sci_done_cnt : integer := 0; 
-constant SCI_BAUD_PERIOD : integer := 10416;
-constant MORSE_BAUD_PERIOD : integer := 10416;
+constant SCI_BAUD_PERIOD : integer := 1042;
+constant MORSE_BAUD_PERIOD : integer := 1042;
 constant SCI_INACTIVE_THRESHOLD : integer := 50 * SCI_BAUD_PERIOD; 
 
 -- FSM Signals 
@@ -104,6 +117,16 @@ signal receive_en : std_logic := '0';
 -----------------------------
 begin
 -------------------
+-- Clocking 
+-------------------
+clocking: system_clock_generator 
+generic map(
+	CLOCK_DIVIDER_RATIO => 10)               
+port map(
+	input_clk_port 		=> clk_ext_port,
+	system_clk_port 	=> system_clk,
+	fwd_clk_port		=> open);
+-------------------
 -- SCI Receiver 
 -------------------
 receiver: Sci_Rx
@@ -111,7 +134,7 @@ generic map(
     BAUD_PERIOD => SCI_BAUD_PERIOD)
 port map(
     receive_en => receive_en,
-    clk  => clk_ext_port, 
+    clk  => system_clk, 
     rx   => sci_data_ext_port, 
     sci_ready => sci_ready,
     sci_output => sci_output);
@@ -126,7 +149,7 @@ port map(
     data_in => queue_output, 
     transmit_en => transmit_en, 
     queue_empty => queue_empty,
-    clk => clk_ext_port, 
+    clk => system_clk, 
     tx => tx_output, 
     tx_done => tx_done, 
     new_symbol => new_symbol);
@@ -140,7 +163,7 @@ queue_mem: Queue
 generic map(
     QUEUE_LENGTH => 64)
 port map(
-    clk => clk_ext_port, 
+    clk => system_clk, 
     write => sci_ready,
     read => new_symbol,
     data_in => sci_output,
@@ -151,9 +174,9 @@ port map(
 -----------------------------
 -- Top Level Controller Logic
 -----------------------------
-state_update : process(clk_ext_port) 
+state_update : process(system_clk) 
 begin 
-    if rising_edge(clk_ext_port) then
+    if rising_edge(system_clk) then
         CS <= NS;
     end if;
 end process;
@@ -192,9 +215,9 @@ end process;
 -----------------------------
 -- Top Level Datapath Logic
 -----------------------------
-sci_done_counter : process(clk_ext_port, transmit_en, sci_ready, sci_done_cnt)
+sci_done_counter : process(system_clk, transmit_en, sci_ready, sci_done_cnt)
 begin 
-    if rising_edge(clk_ext_port) then 
+    if rising_edge(system_clk) then 
         if receive_en = '1' then 
             sci_done_cnt <= sci_done_cnt + 1;
         end if; 
