@@ -39,8 +39,8 @@ set_property PACKAGE_PIN W5 [get_ports clk_ext_port]
 	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[13]}]
 #set_property PACKAGE_PIN T1 [get_ports {sw[14]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[14]}]
-#set_property PACKAGE_PIN R2 [get_ports {sw[15]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[15]}]
+set_property PACKAGE_PIN R2 [get_ports rx_tx_sw_ext_port]					
+	set_property IOSTANDARD LVCMOS33 [get_ports rx_tx_sw_ext_port]
  
 
 ## LEDs
@@ -176,8 +176,8 @@ set_property PACKAGE_PIN A16 [get_ports sci_tx_ext_port]
 
 ##Pmod Header JC
 ##Sch name = JC1
-#set_property PACKAGE_PIN K17 [get_ports {JC[0]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JC[0]}]
+set_property PACKAGE_PIN K17 [get_ports morse_audio_ext_port]					
+	set_property IOSTANDARD LVCMOS33 [get_ports morse_audio_ext_port]
 ##Sch name = JC2
 #set_property PACKAGE_PIN M18 [get_ports {JC[1]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {JC[1]}]

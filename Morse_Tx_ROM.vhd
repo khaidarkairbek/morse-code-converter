@@ -66,14 +66,20 @@ begin
 end process; 
 
 -------------------
--- Bit counter 
+-- Bit counter and shift register
 -------------------
 bit_counter: process(clk, bit_cnt)
 begin
     if rising_edge(clk) then 
-        if new_bit = '1' and Length_cnt_en = '1' then 
-            bit_cnt <= bit_cnt - 1; 
-        end if; 
+        if symbol_load = '1' then
+            bit_cnt <= Morse_Code_Length; 
+            data_register <= Morse_code;
+        elsif new_bit = '1' then 
+            data_register <= data_register(20 downto 0) & '0'; 
+            if length_cnt_en = '1' then 
+                bit_cnt <= bit_cnt - 1;
+            end if; 
+        end if;
     end if; 
     
     length_tc <= '0'; 
@@ -81,18 +87,6 @@ begin
         length_tc <= '1'; 
     end if;
 end process; 
-
--------------------
--- Shift Register 
--------------------
-shift_register: process(clk)
-begin
-    if rising_edge(clk) then 
-        if new_bit = '1' then 
-            data_register <= data_register(20 downto 0) & '0'; 
-        end if;
-    end if; 
-end process;
 
 tx <= data_register(21); 
 new_symbol <= symbol_load; 
@@ -132,7 +126,9 @@ begin
                 NS <= Load;
             end if;
         when Done => 
-            NS <= Idle; 
+            if transmit_en = '0' then 
+                NS <= Idle; 
+            end if;
         when Others => null;
     end case; 
 end process;
@@ -157,12 +153,11 @@ begin
     end case;
 end process;
 
-
 ----------------------------------------
 --ROM 
 ----------------------------------------
 ROM : process(data_in)
-begin 
+begin  
         case to_integer(unsigned(data_in)) is 
             when 32 =>  -- space
                 Morse_Code <= "0000000000000000000000"; 
@@ -281,7 +276,5 @@ begin
             	Morse_code <= "0000000000000000000000";
     			Morse_code_length <= 0;
         end case;
-        bit_cnt <= Morse_code_length;
-        data_register <= Morse_code;
 end process;
 end Behavioral;

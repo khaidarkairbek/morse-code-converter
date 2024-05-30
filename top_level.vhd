@@ -15,9 +15,11 @@ entity top_level is
 port(
     clk_ext_port : in std_logic; 
     sci_data_ext_port : in std_logic; 
+    rx_tx_sw_ext_port : in std_logic;
 
     morse_tx_ext_port : out std_logic; 
-    morse_tx_done_ext_port : out std_logic; 
+    morse_tx_done_ext_port : out std_logic;
+    morse_audio_ext_port: out std_logic; 
     sci_tx_ext_port : out std_logic; 
     receive_en_ext_port : out std_logic;
     transmit_en_ext_port : out std_logic); 
@@ -89,7 +91,9 @@ end component;
 -- Local Signal Declarations
 ----------------------------
 signal system_clk : std_logic := '0';
-signal rx_done : std_logic := '0'; 
+signal audio_clk : std_logic := '0';
+signal audio_output : std_logic := '0'; 
+--signal rx_done : std_logic := '0'; 
 signal sci_ready : std_logic := '0';
 signal sci_output : std_logic_vector(7 downto 0) := (others => '0'); 
 signal queue_output : std_logic_vector(7 downto 0) := (others => '0');
@@ -98,10 +102,10 @@ signal tx_done : std_logic := '0';
 signal new_symbol : std_logic := '0'; 
 signal queue_empty : std_logic := '0'; 
 signal queue_full : std_logic := '0'; 
-signal sci_done_tc : std_logic := '0'; 
-signal sci_done_cnt : integer := 0; 
+--signal sci_done_tc : std_logic := '0'; 
+--signal sci_done_cnt : integer := 0; 
 constant SCI_BAUD_PERIOD : integer := 1042;
-constant MORSE_BAUD_PERIOD : integer := 1042;
+constant MORSE_BAUD_PERIOD : integer := 500000;
 constant SCI_INACTIVE_THRESHOLD : integer := 50 * SCI_BAUD_PERIOD; 
 
 -- FSM Signals 
@@ -126,6 +130,30 @@ port map(
 	input_clk_port 		=> clk_ext_port,
 	system_clk_port 	=> system_clk,
 	fwd_clk_port		=> open);
+	
+-------------------
+-- Audio Out Clocking 
+-------------------
+audio_clocking: system_clock_generator 
+generic map(
+	CLOCK_DIVIDER_RATIO => 100000)               
+port map(
+	input_clk_port 		=> clk_ext_port,
+	system_clk_port 	=> audio_clk,
+	fwd_clk_port		=> open);
+
+-------------------
+-- Audio Out Clocking 
+-------------------
+audio_frequency_generator: process(audio_clk)
+begin
+    if rising_edge(audio_clk) then 
+        if tx_output = '1' then 
+            audio_output <= not audio_output;
+        else audio_output <= '0';
+        end if;
+    end if; 
+end process; 
 -------------------
 -- SCI Receiver 
 -------------------
@@ -154,7 +182,8 @@ port map(
     tx_done => tx_done, 
     new_symbol => new_symbol);
 morse_tx_ext_port <= tx_output; 
-morse_tx_done_ext_port <= tx_done; 
+morse_tx_done_ext_port <= tx_done;
+morse_audio_ext_port <= audio_output; 
 
 -------------------
 -- Queue
@@ -182,16 +211,16 @@ begin
 end process;
 
 
-ns_logic : process(CS, rx_done, tx_done)
+ns_logic : process(CS,rx_tx_sw_ext_port)
 begin
     NS <= CS;
     case CS is 
         when Receive => 
-            if rx_done = '1' then 
+            if rx_tx_sw_ext_port = '1' then 
                 NS <= Transmit;
             end if;
         when Transmit => 
-            if tx_done = '1' then 
+            if rx_tx_sw_ext_port = '0' then 
                 NS <= Receive;
             end if;
         when others => 
@@ -215,25 +244,25 @@ end process;
 -----------------------------
 -- Top Level Datapath Logic
 -----------------------------
-sci_done_counter : process(system_clk, transmit_en, sci_ready, sci_done_cnt)
-begin 
-    if rising_edge(system_clk) then 
-        if receive_en = '1' then 
-            sci_done_cnt <= sci_done_cnt + 1;
-        end if; 
+--sci_done_counter : process(system_clk, transmit_en, sci_ready, sci_done_cnt)
+--begin 
+    --if rising_edge(system_clk) then 
+        --if receive_en = '1' then 
+            --sci_done_cnt <= sci_done_cnt + 1;
+        --end if; 
 
-        if transmit_en = '1' or sci_ready = '1' or sci_done_tc = '1' then 
-            sci_done_cnt <= 0; 
-        end if;
-    end if;  
+        --if transmit_en = '1' or sci_ready = '1' or sci_done_tc = '1' then 
+            --sci_done_cnt <= 0; 
+        --end if;
+    --end if;  
 
-    sci_done_tc <= '0'; 
-    if sci_done_cnt = SCI_INACTIVE_THRESHOLD - 1 then 
-        sci_done_tc <= '1'; 
-    end if; 
-end process; 
+    --sci_done_tc <= '0'; 
+    --if sci_done_cnt = SCI_INACTIVE_THRESHOLD - 1 then 
+        --sci_done_tc <= '1'; 
+    --end if; 
+--end process; 
 
-rx_done <= (sci_done_tc or queue_full) and (not queue_empty); 
+--rx_done <= (sci_done_tc or queue_full) and (not queue_empty); 
 receive_en_ext_port <= receive_en;
 transmit_en_ext_port <= transmit_en;
 sci_tx_ext_port <= sci_data_ext_port;

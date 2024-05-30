@@ -20,8 +20,11 @@ component top_level
 port(
     clk_ext_port        : in  std_logic;
     sci_data_ext_port   : in  std_logic;
+    rx_tx_sw_ext_port   : in  std_logic;
+    
     morse_tx_ext_port   : out  std_logic;
     morse_tx_done_ext_port  : out std_logic;
+    morse_audio_ext_port: out std_logic; 
     sci_tx_ext_port : out std_logic; 
     receive_en_ext_port : out std_logic;
     transmit_en_ext_port : out std_logic);
@@ -30,10 +33,12 @@ end component;
 -- Inputs
 signal clk      : std_logic := '0';
 signal sci_data     : std_logic := '1'; 
+signal rx_tx_switch : std_logic := '0';
 
 -- Outputs
 signal tx       : std_logic;
 signal tx_done : std_logic;
+signal morse_audio : std_logic;
 
 -- Clock period definitions
 constant clk_period : time := 10 ns;  -- Assuming a 10 MHz clock
@@ -74,8 +79,10 @@ begin
     uut: top_level port map (
         clk_ext_port => clk,
         sci_data_ext_port => sci_data,
+        rx_tx_sw_ext_port => rx_tx_switch,
         morse_tx_ext_port => tx,
-        morse_tx_done_ext_port => tx_done);
+        morse_tx_done_ext_port => tx_done,
+        morse_audio_ext_port => morse_audio);
 
     -- Clock process definitions
     clk_process : process
@@ -93,6 +100,8 @@ begin
             sci_data <= data(i); 
             wait for SCI_BAUD_PERIOD * clk_period; 
         end loop;
+        wait for 100 * clk_period;
+        rx_tx_switch <= '1'; 
         wait;
     end process; 
 
