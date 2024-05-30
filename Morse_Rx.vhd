@@ -18,7 +18,7 @@ entity Morse_RX is
   generic(
     BAUD_PERIOD : integer);
   Port ( 
-    receive_en : in std_logic; 
+    --receive_en : in std_logic; 
   	clk : in STD_Logic;
   	rx : in std_logic;
     morse_ready : out std_logic;
@@ -27,7 +27,7 @@ end Morse_RX;
 
 architecture Behavioral of Morse_RX is
 -- FSM states 
-type state_type is (Idle, Shift, Ready, SpaceReady, NotLegit);
+type state_type is (Idle, Shift, Ready, SpaceReady, NotLegit, ClearReg);
 signal CS, NS : State_type := Idle;
 
 -- FSM Control Signlas
@@ -41,12 +41,15 @@ signal baud_cnt: integer := 0;
 signal baud_tc : std_logic := '0';
 signal half_baud_tc : std_logic := '0';
 signal bit_tc : std_logic := '0'; 
+signal bit_cnt_clr : std_logic := '0';
+signal not_legit_tc : std_logic := '0';
 signal zero_cnt : integer := 0;
 signal two_zero_tc : std_logic := '0'; 
 signal three_zero_tc : std_logic := '0'; 
 signal five_zero_tc  : std_logic := '0';
 signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(21 downto 0) := (others => '0');
+signal reg_clr : std_logic := '0';
 
 begin
 
@@ -87,7 +90,7 @@ begin
     
     -- asynchronous bit count TC
     not_legit_tc <= '0'; 
-    if bit_cnt = 22 then 
+    if bit_cnt = 23 then 
     	not_legit_tc <= '1'; 
     end if;
 end process;
@@ -125,17 +128,26 @@ end process;
 shift_register: process(clk)
 begin
     if rising_edge(clk) then 
-        if half_baud_tc = '1' then 
-            data_register <= data_register(21 downto 1) & rx; 
+        if half_baud_tc = '1' and bit_cnt_en = '1' then 
+            data_register <= data_register(20 downto 0) & rx; 
         end if;
 
-        if morse_ready = '1' then 
+        if reg_clr = '1' then 
             data_register <= (others => '0');
         end if; 
     end if; 
 end process;
 
-morse_output <= data_register((bit_cnt - 1) downto 0) & (others => '0');
+morse_output_process: process(bit_cnt)
+begin 
+        if bit_cnt = 22 then
+			morse_output <= data_register; 
+		elsif bit_cnt < 22 then 
+            morse_output <= data_register(bit_cnt downto 0) & data_register(21 downto (bit_cnt+1));
+        else morse_output <= (others => '0');
+        end if;
+end process;
+--morse_output <= data_register((bit_cnt - 1) downto 0) & (22-bit_cnt-1 downto 0 => '0') when bit_cnt < 22 else (others => '0');))
 
 ----------------------------------------
 --FSM Logic 
@@ -148,7 +160,7 @@ begin
     end if;
 end process;
 
-NS_Logic : process(CS, rx, three_zero_tc, two_zero_tc, not_legit_tc)
+NS_Logic : process(CS, rx, three_zero_tc, two_zero_tc, not_legit_tc, five_zero_tc)
 begin
     NS <= CS; 
     case CS is 
@@ -163,18 +175,15 @@ begin
                 NS <= NotLegit;
             end if;
         when Ready =>
-            if five_zero_tc = '1' then 
-                if rx = '1' then 
-                    NS <= SpaceReady; 
-                else NS <= Idle; 
-                end if; 
-            elsif rx = '1' then 
-                NS <= Idle; 
+            if five_zero_tc = '1' and rx = '1' then  
+                    NS <= SpaceReady;  
+            elsif five_zero_tc = '1' or rx = '1' then 
+                NS <= ClearReg; 
             end if;
         when SpaceReady =>
-            NS <= Idle; 
+            NS <= ClearReg; 
         when NotLegit => 
-            NS <= Idle; 
+            NS <= ClearReg; 
         when Others =>
         	NS <= Idle;
         end case;
@@ -188,6 +197,7 @@ begin
     baud_cnt_en <= '0';
     bit_cnt_en <= '0';
     morse_ready <= '0';
+    reg_clr <= '0';
     case CS is 
         when Idle => 
             bit_cnt_clr <= '1';
@@ -200,10 +210,11 @@ begin
             zero_cnt_en <= '1'; 
             baud_cnt_en <= '1'; 
         when SpaceReady => 
-            morse_ready => '1'; 
-        when NotLegit => null; 
+            morse_ready <= '1'; 
+        when NotLegit => null;
+        when ClearReg => 
+             reg_clr <= '1';
         when Others => null;
-        end case; 
     end case;
 end process;    
 

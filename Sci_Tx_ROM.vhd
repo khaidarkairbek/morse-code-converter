@@ -42,7 +42,7 @@ Signal sci_code : std_logic_vector(9 downto 0) := (others => '0');
 -- Datapath signals
 signal new_bit : std_logic := '0';
 signal bit_cnt : integer := 0;
-signal data_register : std_logic_vector(9 downto 0) :=(others => '0');
+signal data_register : std_logic_vector(9 downto 0) :=(others => '1');
 signal baud_cnt: integer := 0;
 
 begin 
