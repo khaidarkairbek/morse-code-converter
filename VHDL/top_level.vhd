@@ -106,6 +106,18 @@ component Sci_Tx_ROM is
         tx_done: out std_logic;
         new_symbol: out std_logic);
 end component;
+-------------------
+-- PWM Audio Generator
+-------------------
+component PWM_Audio_Generator
+    generic(
+        AUDIO_SAMPLE_RATE	: integer;
+	    PWM_TC				: unsigned(7 downto 0));
+    Port ( 
+        audio_signal : in std_logic; 
+  	    clk : in STD_Logic;
+        pwm_audio_signal : out std_logic);
+end component;
 
 -------------------
 -- Queue
@@ -147,7 +159,7 @@ signal sci_rx_queue_full : std_logic := '0';
 --signal sci_done_tc : std_logic := '0'; 
 --signal sci_done_cnt : integer := 0; 
 constant SCI_RX_BAUD_PERIOD : integer := 1042;
-constant MORSE_TX_BAUD_PERIOD : integer := 500000;
+constant MORSE_TX_BAUD_PERIOD : integer := 512000;
 
 ----------------------------
 -- Local Morse Receiver and SCI Transmitter Signal Declarations
@@ -163,7 +175,7 @@ signal morse_rx_queue_empty : std_logic := '0';
 signal morse_rx_queue_full : std_logic := '0'; 
 signal morse_rx_queue_write : std_logic := '0';
 constant SCI_TX_BAUD_PERIOD : integer := 1042;
-constant MORSE_RX_BAUD_PERIOD : integer := 500000;
+constant MORSE_RX_BAUD_PERIOD : integer := 512000;
 
 -- FSM Signals 
 type state_type is (SciReceive, MorseTransmit, MorseReceive, SciTransmit);
@@ -193,26 +205,33 @@ port map(
 -------------------
 -- Audio Out Clocking 
 -------------------
-audio_clocking: system_clock_generator 
+--audio_clocking: system_clock_generator 
+--generic map(
+	--CLOCK_DIVIDER_RATIO => 2000)               
+--port map(
+	--input_clk_port 		=> clk_ext_port,
+	--system_clk_port 	=> audio_clk,
+	--fwd_clk_port		=> open);
+-----------------------------
+-- Audio Out Signal Generator 
+-----------------------------
+pwm_audio_signal_generator: PWM_Audio_Generator
 generic map(
-	CLOCK_DIVIDER_RATIO => 100000)               
-port map(
-	input_clk_port 		=> clk_ext_port,
-	system_clk_port 	=> audio_clk,
-	fwd_clk_port		=> open);
-
--------------------
--- Audio Out Clocking 
--------------------
-audio_frequency_generator: process(audio_clk)
-begin
-    if rising_edge(audio_clk) then 
-        if morse_tx_output = '1' then 
-            audio_output <= not audio_output;
-        else audio_output <= '0';
-        end if;
-    end if; 
-end process; 
+        AUDIO_SAMPLE_RATE	=>  MORSE_TX_BAUD_PERIOD/5,
+	    PWM_TC				=> "01010000")
+Port map( 
+        audio_signal => morse_tx_output,
+  	    clk => system_clk,
+        pwm_audio_signal => audio_output);
+--audio_frequency_generator: process(audio_clk)
+--begin
+  --  if rising_edge(audio_clk) then 
+    --    if morse_tx_output = '1' then 
+     --       audio_output <= not audio_output;
+       -- else audio_output <= '0';
+        --end if;
+    --end if; 
+--end process; 
 -------------------
 -- SCI Receiver 
 -------------------
@@ -400,7 +419,7 @@ receive_en_ext_port <= sci_receive_en or morse_receive_en;
 transmit_en_ext_port <= morse_transmit_en or sci_transmit_en;
 sci_rx_osc_ext_port <= sci_data_ext_port;
 morse_tx_osc_port <= morse_tx_output;
-sci_tx_ext_port <= sci_tx_output; 
+sci_tx_ext_port <= sci_data_ext_port when CS = SciReceive else sci_tx_output; 
 sci_tx_done_ext_port <= sci_tx_done;
 morse_tx_ext_port <= morse_tx_output; 
 morse_tx_done_ext_port <= morse_tx_done;

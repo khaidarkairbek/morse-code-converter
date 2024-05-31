@@ -65,10 +65,10 @@ signal morse_tx_done_2 : std_logic;
 signal morse_audio_2  : std_logic;
 
 -- Clock period definitions
-constant clk_period : time := 10 ns;  -- Assuming a 10 MHz clock
+constant clk_period : time := 10 ns;  -- Assuming a 100 MHz clock
 constant SCI_BAUD_PERIOD : integer := 10416;
 constant MORSE_BAUD_PERIOD : integer := 10416;
-signal device_2_sci_data : std_logic_vector(57 downto 0) := (others => '1');
+signal device_2_sci_data : std_logic_vector(67 downto 0) := (others => '1');
 
 
 begin
@@ -121,9 +121,9 @@ begin
         device_switch_2 <= '0';   -- sercond device is sci rx and morse tx
         
         --sci data for device 2
-        device_2_sci_data <= "1111101000001010001100101000110010100011001010001100101111";
+        device_2_sci_data <= "11111010000010100000010010001100101000110010100011001010001100101111";
         wait for 5 * clk_period;
-        for i in 57 downto 0 loop
+        for i in 67 downto 0 loop
             sci_rx_data_2 <= device_2_sci_data(i);
             wait for SCI_BAUD_PERIOD * clk_period;
         end loop;

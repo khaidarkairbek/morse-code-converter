@@ -221,6 +221,7 @@ begin
         when NotLegit => null;
         when ClearReg => 
              reg_clr <= '1';
+             baud_cnt_en <= '1';
         when Others => null;
     end case;
 end process;    
