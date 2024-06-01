@@ -16,7 +16,9 @@ END Sci_Tx_ROM_tb;
 
 ARCHITECTURE testbench OF Sci_Tx_ROM_tb IS
 
-    -- Component Declaration for the Unit Under Test (UUT)
+---------------------------
+--Component Declaration
+---------------------------
     COMPONENT Sci_Tx_ROM
     generic(
         BAUD_PERIOD : integer);
@@ -30,26 +32,36 @@ ARCHITECTURE testbench OF Sci_Tx_ROM_tb IS
         new_symbol: out std_logic);
     END COMPONENT;
     
-    --Inputs
+---------------------------
+--Inputs
+---------------------------
     signal clk     : std_logic := '0';
     signal transmit_en : std_logic := '0';
     signal Data_in : std_logic_vector(21 downto 0) := (others => '0');
     signal empty    : std_logic := '0';
 
-    --Outputs
+---------------------------
+--Outputs
+---------------------------
     signal Tx      : std_logic;
     signal tx_done : std_logic; 
     signal new_symbol : std_logic; 
 
-    -- Clock period definitions
+---------------------------
+--Clock period definitions
+---------------------------
     constant clk_period : time := 100 ns; -- 10 MHz
     
-    -- Queue simulation definitions
+---------------------------
+--Queue simulation definitions
+---------------------------
     signal address : integer := 0; 
 
 BEGIN
 
-    -- Instantiate the Unit Under Test (UUT)
+---------------------------
+--Instantiate uut
+---------------------------
     uut: Sci_Tx_ROM 
     generic map (
         BAUD_PERIOD => 400)
@@ -62,16 +74,18 @@ BEGIN
         tx_done => tx_done, 
         new_symbol => new_symbol);
 
-    -- Clock process definitions
+---------------------------
+--Clock process
+---------------------------
     clk_process : process
     begin
-        clk <= '0';
-        wait for clk_period/2;
-        clk <= '1';
+        clk <= not clk;
         wait for clk_period/2;
     end process;
     
-    -- Process simulating queue
+---------------------------
+--Queue Simulation process
+---------------------------
     queue_process : process(new_symbol)
     begin 
     	if new_symbol = '1' then
@@ -80,10 +94,10 @@ BEGIN
                 	data_in <= "1110111011101110111000";  -- 0
                     empty <= '0';  
                 when 1 => 
-                	data_in <= "1011100000000000000000";  -- A
+                	data_in <= "0000000000000010111000";  -- A
                     empty <= '0';
                 when 2 => 
-                	data_in <= "1110111010100000000000";  -- Z
+                	data_in <= "0000000011101110101000";  -- Z
                     empty <= '1';
                 when others => 
                 	data_in <= "0000000000000000000000";
@@ -95,14 +109,16 @@ BEGIN
     
     
 
-    -- Stimulus process
+---------------------------
+--Stimulus Process
+---------------------------
     stim_proc: process
     begin        
         -- Initialize Inputs
         transmit_en <= '0';
         wait for clk_period * 10;
         
-        -- Scenario 1: Load data "10101010"
+        -- Scenario 1
         transmit_en <= '1';  -- Load the data
 
         -- Wait for transmission to complete 

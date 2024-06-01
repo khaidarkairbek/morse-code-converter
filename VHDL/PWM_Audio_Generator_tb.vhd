@@ -15,7 +15,9 @@ END PWM_Audio_Generator_tb;
 
 ARCHITECTURE testbench OF PWM_Audio_Generator_tb IS 
 
-    -- Component Declaration for the Unit Under Test (UUT)
+---------------------------
+--Comnponent declaration of uut
+---------------------------
     COMPONENT PWM_Audio_Generator
     generic(
         AUDIO_SAMPLE_RATE	: integer;
@@ -26,29 +28,39 @@ ARCHITECTURE testbench OF PWM_Audio_Generator_tb IS
 		pwm_audio_signal : out std_logic);
     END COMPONENT;
     
-    --Inputs
+---------------------------
+--Inputs
+---------------------------
     signal clk : std_logic := '0';
     signal audio_signal : std_logic := '0';
 
-    --Outputs
+---------------------------
+--Outputs
+---------------------------
     signal pwm_audio_signal      : std_logic;
 
-    -- Clock period definitions
+---------------------------
+--Clock period definitions
+---------------------------
     constant clk_period : time := 100 ns; -- 10 MHz
 
 BEGIN
 
-    -- Instantiate the Unit Under Test (UUT)
+---------------------------
+--Instantiate uut
+---------------------------
     uut: PWM_Audio_Generator 
     generic map(
-    AUDIO_SAMPLE_RATE => 51200, 
-	PWM_TC => to_unsigned(128, 8))
+    AUDIO_SAMPLE_RATE => 512, 
+	PWM_TC => "10000000")   -- 128 for half on half off
     PORT MAP (
         audio_signal => audio_signal,
         pwm_audio_signal => pwm_audio_signal, 
         clk => clk);
 
-    -- Clock process definitions
+---------------------------
+--Clock process
+---------------------------
     clk_process :process
     begin
         clk <= '0';
@@ -57,7 +69,9 @@ BEGIN
         wait for clk_period/2;
     end process;
 
-    -- Stimulus process
+---------------------------
+--Stimulus process
+---------------------------
     stim_proc: process
     begin        
         -- Initialize Inputs

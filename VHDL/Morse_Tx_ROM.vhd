@@ -7,7 +7,6 @@
 -- Description: Morse Transmitter 
 ----------------------------------------------------------------------------------
 
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -26,21 +25,29 @@ entity Morse_Tx_ROM is
 end Morse_Tx_ROM;
 
 architecture Behavioral of Morse_Tx_ROM is
---FSM states 
+---------------------------
+--FSM States
+---------------------------
 type state_type is (Idle, Load, Read_ROM, Transmit, Check, Done);
 signal CS, NS : state_type := Idle;
 
---FSM signals 
+---------------------------
+--FSM Signals
+--------------------------- 
 Signal symbol_load : std_logic := '0';
 signal length_tc : std_logic := '0';
 Signal length_cnt_en  : std_Logic := '0';
 signal rom_read : std_logic := '0'; 
 
--- ROM signals 
+---------------------------
+--ROM Signals
+---------------------------
 Signal Morse_code : std_logic_vector(21 downto 0) := (others => '0');
 signal Morse_Code_Length : integer := 0;
 
--- Datapath signals
+---------------------------
+--Datapath Signals
+---------------------------
 signal new_bit : std_logic := '0';
 signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(21 downto 0) :=(others => '0');
@@ -65,9 +72,9 @@ begin
     end if;
 end process; 
 
--------------------
+---------------------------------
 -- Bit counter and shift register
--------------------
+---------------------------------
 bit_counter: process(clk, bit_cnt)
 begin
     if rising_edge(clk) then 
@@ -154,14 +161,14 @@ begin
 end process;
 
 ----------------------------------------
---ROM 
+--aka ROM (not really)
 ----------------------------------------
 ROM : process(data_in)
 begin  
         case to_integer(unsigned(data_in)) is 
             when 32 =>  -- space
                 Morse_Code <= "0000000000000000000000"; 
-                Morse_code_length <= 4;   -- 3 0s between words, 1 is from prev symbol and 2 from space itself
+                Morse_code_length <= 4;   -- 7 0s between words, 3 is from prev symbol and 4 from space itself
             -- 0 through 9
             When 48 => 
                 Morse_Code <= "1110111011101110111000";

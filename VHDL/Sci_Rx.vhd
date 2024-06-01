@@ -7,7 +7,6 @@
 -- Description: SCI Receiver
 ----------------------------------------------------------------------------------
 
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -26,15 +25,21 @@ entity Sci_RX is
 end Sci_RX;
 
 architecture Behavioral of Sci_RX is
--- FSM states 
+---------------------------
+--FSM States
+---------------------------
 type state_type is (Idle, Shift, Ready);
 signal CS, NS : State_type := Idle;
 
--- FSM Control Signlas
+---------------------------
+--FSM Control Signals
+---------------------------
 signal baud_cnt_en : std_logic := '0';
 Signal bit_cnt_en : std_logic := '0';
 
--- Datapath signals
+---------------------------
+--Datapath Signals
+---------------------------
 constant HALF_BAUD_PERIOD : integer := BAUD_PERIOD / 2;
 signal baud_cnt: integer := 0;
 signal baud_tc : std_logic := '0';
@@ -44,7 +49,9 @@ signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(9 downto 0) := (others => '0');
 
 begin
-
+---------------------------
+--Baud Counter
+---------------------------
 baud_counter: process(clk, baud_cnt)
 begin
 	if rising_edge(clk) then
@@ -68,6 +75,9 @@ begin
     end if;
 end process; 
 
+---------------------------
+--Bit Counter
+---------------------------
 bit_counter: process(clk, bit_cnt)
 begin
 	if rising_edge(clk) then

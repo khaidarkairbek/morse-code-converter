@@ -27,6 +27,7 @@ port(
 	sci_tx_ext_port : out std_logic;    -- USB UART Bridge Tx (A18)
     sci_tx_done_ext_port : out std_logic;  -- LED U16
     sci_rx_osc_ext_port : out std_logic; --JB2 (A16)
+    morse_tx_led_port : out std_logic;  -- LED8 (V13)
     morse_tx_osc_port : out std_logic;  -- JB1 (A14)
     receive_en_ext_port : out std_logic;   -- LED E19
     transmit_en_ext_port : out std_logic);  -- LED P1
@@ -137,33 +138,31 @@ component Queue is
 end component; 
 
 
-----------------------------
+------------------------------------
 -- Local Common Signal Declarations
-----------------------------
+------------------------------------
 signal system_clk : std_logic := '0';  
 
-----------------------------
+---------------------------------------------------------------
 -- Local SCI Receiver and Morse Transmitter Signal Declarations
-----------------------------
+---------------------------------------------------------------
 signal morse_tx_new_symbol : std_logic := '0';
 signal morse_tx_output : std_logic := '0';
 signal morse_tx_done : std_logic := '0';
 signal audio_clk : std_logic := '0';
-signal audio_output : std_logic := '0';
---signal rx_done : std_logic := '0'; 
+signal audio_output : std_logic := '0'; 
 signal sci_rx_ready : std_logic := '0';
 signal sci_rx_output : std_logic_vector(7 downto 0) := (others => '0'); 
 signal sci_rx_queue_output : std_logic_vector(7 downto 0) := (others => '0');
 signal sci_rx_queue_empty : std_logic := '0'; 
 signal sci_rx_queue_full : std_logic := '0'; 
---signal sci_done_tc : std_logic := '0'; 
---signal sci_done_cnt : integer := 0; 
 constant SCI_RX_BAUD_PERIOD : integer := 1042;
-constant MORSE_TX_BAUD_PERIOD : integer := 512000;
+constant MORSE_TX_BAUD_PERIOD : integer := 512000; --FOR SYNTHESIS
+--constant MORSE_TX_BAUD_PERIOD : integer := 1042;   -- FOR SIMULATION
 
-----------------------------
+---------------------------------------------------------------
 -- Local Morse Receiver and SCI Transmitter Signal Declarations
----------------------------
+---------------------------------------------------------------
 signal sci_tx_new_symbol : std_logic := '0';
 signal sci_tx_output : std_logic := '1';
 signal sci_tx_done : std_logic := '0';
@@ -175,13 +174,18 @@ signal morse_rx_queue_empty : std_logic := '0';
 signal morse_rx_queue_full : std_logic := '0'; 
 signal morse_rx_queue_write : std_logic := '0';
 constant SCI_TX_BAUD_PERIOD : integer := 1042;
-constant MORSE_RX_BAUD_PERIOD : integer := 512000;
+constant MORSE_RX_BAUD_PERIOD : integer := 512000; -- FOR SYNTHESIS
+--constant MORSE_RX_BAUD_PERIOD : integer := 1042;  -- FOR SIMULATION
 
--- FSM Signals 
+---------------------------------------------------------------
+-- FSM States
+---------------------------------------------------------------
 type state_type is (SciReceive, MorseTransmit, MorseReceive, SciTransmit);
 signal CS, NS : state_type := SciReceive;
 
---FSM signals 
+---------------------------------------------------------------
+-- FSM Signals
+---------------------------------------------------------------
 signal morse_transmit_en : std_logic := '0'; 
 signal sci_receive_en : std_logic := '0';
 signal sci_transmit_en : std_logic := '0'; 
@@ -201,37 +205,17 @@ port map(
 	input_clk_port 		=> clk_ext_port,
 	system_clk_port 	=> system_clk,
 	fwd_clk_port		=> open);
-	
--------------------
--- Audio Out Clocking 
--------------------
---audio_clocking: system_clock_generator 
---generic map(
-	--CLOCK_DIVIDER_RATIO => 2000)               
---port map(
-	--input_clk_port 		=> clk_ext_port,
-	--system_clk_port 	=> audio_clk,
-	--fwd_clk_port		=> open);
 -----------------------------
 -- Audio Out Signal Generator 
 -----------------------------
 pwm_audio_signal_generator: PWM_Audio_Generator
 generic map(
-        AUDIO_SAMPLE_RATE	=>  MORSE_TX_BAUD_PERIOD/5,
-	    PWM_TC				=> "01010000")
+        AUDIO_SAMPLE_RATE	=>  MORSE_TX_BAUD_PERIOD/10,
+	    PWM_TC				=> "10000000")
 Port map( 
         audio_signal => morse_tx_output,
   	    clk => system_clk,
         pwm_audio_signal => audio_output);
---audio_frequency_generator: process(audio_clk)
---begin
-  --  if rising_edge(audio_clk) then 
-    --    if morse_tx_output = '1' then 
-     --       audio_output <= not audio_output;
-       -- else audio_output <= '0';
-        --end if;
-    --end if; 
---end process; 
 -------------------
 -- SCI Receiver 
 -------------------
@@ -340,7 +324,6 @@ begin
     end if;
 end process;
 
-
 ns_logic : process(CS,rx_tx_sw_ext_port, morse_sci_rx_sw_ext_port)
 begin
     NS <= CS;
@@ -391,30 +374,8 @@ begin
         	sci_transmit_en <= '1';
         when Others => 
     end case;
-end process;
+end process; 
 
------------------------------
--- Top Level Datapath Logic
------------------------------
---sci_done_counter : process(system_clk, transmit_en, sci_ready, sci_done_cnt)
---begin 
-    --if rising_edge(system_clk) then 
-        --if receive_en = '1' then 
-            --sci_done_cnt <= sci_done_cnt + 1;
-        --end if; 
-
-        --if transmit_en = '1' or sci_ready = '1' or sci_done_tc = '1' then 
-            --sci_done_cnt <= 0; 
-        --end if;
-    --end if;  
-
-    --sci_done_tc <= '0'; 
-    --if sci_done_cnt = SCI_INACTIVE_THRESHOLD - 1 then 
-        --sci_done_tc <= '1'; 
-    --end if; 
---end process; 
-
---rx_done <= (sci_done_tc or queue_full) and (not queue_empty); 
 receive_en_ext_port <= sci_receive_en or morse_receive_en;
 transmit_en_ext_port <= morse_transmit_en or sci_transmit_en;
 sci_rx_osc_ext_port <= sci_data_ext_port;
@@ -426,5 +387,6 @@ morse_tx_done_ext_port <= morse_tx_done;
 morse_audio_ext_port <= audio_output; 
 morse_rx_osc_port <= morse_data_ext_port;
 sci_tx_osc_port <= sci_tx_output;
+morse_tx_led_port <= morse_tx_output;
 
 end Behavioral; 

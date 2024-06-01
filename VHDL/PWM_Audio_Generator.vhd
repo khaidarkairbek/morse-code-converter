@@ -7,7 +7,6 @@
 -- Description: Generates PWM Audio Signal
 ----------------------------------------------------------------------------------
 
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -25,14 +24,20 @@ entity PWM_Audio_Generator is
 end PWM_Audio_Generator;
 
 architecture Behavioral of PWM_Audio_Generator is
--- FSM states 
+---------------------------
+--FSM States
+---------------------------
 type state_type is (Idle, PWMOn, PWMOff);
 signal CS, NS : State_type := Idle;
 
--- FSM Control Signlas
+---------------------------
+--FSM Control Signals
+---------------------------
 signal pwm_cnt_en : std_logic := '0';
 
--- Datapath signals
+---------------------------
+--Datapath signals
+---------------------------
 signal baud_cnt: integer := 0;
 signal baud_tc : std_logic := '0';
 signal pwm_cnt : unsigned(7 downto 0) := (others => '0');
@@ -41,13 +46,16 @@ signal pwm_off_tc : std_logic := '0';
 
 begin
 
+---------------------------
+--Baud counter 
+---------------------------
 baud_counter: process(clk, baud_cnt)
 begin
 	if rising_edge(clk) then
     	if pwm_cnt_en = '1' then 
         	baud_cnt <= baud_cnt + 1;
         end if; 
-        if baud_tc = '1' or pwm_cnt_en = '0' then   --resets the count when tc
+        if baud_tc = '1' or pwm_cnt_en = '0' then   --resets the count when tc or when pwm count not enabled
             baud_cnt <= 0;
         end if;
     end if; 
@@ -59,6 +67,9 @@ begin
     end if;
 end process; 
 
+------------------------------------------------------
+--PWM Counter: controls on and off state of the output
+------------------------------------------------------
 pwm_counter: process(clk, pwm_cnt)
 begin
 	if rising_edge(clk) then
@@ -71,7 +82,7 @@ begin
         end if; 
     end if; 
     
-    -- asynchronous bit count TC
+    -- pwm is on for PWM TC, then off
     pwm_on_tc <= '0'; 
     if pwm_cnt = PWM_TC - 1 then 
     	pwm_on_tc <= '1'; 
@@ -95,7 +106,7 @@ begin
     end if;
 end process;
 
-NS_Logic : process(CS, audio_signal, pwm_on_tc, pwm_off_tc)
+ns_logic : process(CS, audio_signal, pwm_on_tc, pwm_off_tc)
 begin
     NS <= CS; 
     case CS is 
@@ -119,7 +130,7 @@ begin
 end process;
 
 
-Output_Logic : Process(CS)
+output_Logic : Process(CS)
 begin
     pwm_cnt_en <= '1';
     pwm_audio_signal <= '0';

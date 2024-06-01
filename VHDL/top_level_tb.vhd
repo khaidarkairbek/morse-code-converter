@@ -15,7 +15,9 @@ end top_level_tb;
 
 architecture testbench of top_level_tb is
 
--- Component Declaration for the Unit Under Test (UUT)
+---------------------------
+--Component Declaration
+---------------------------
 component top_level
 port(
     clk_ext_port        : in  std_logic;
@@ -28,15 +30,20 @@ port(
     morse_tx_done_ext_port  : out std_logic;
     morse_audio_ext_port: out std_logic; 
     sci_tx_osc_port : out std_logic;
+    morse_rx_osc_port : out std_logic;
 	sci_tx_ext_port : out std_logic; 
     sci_tx_done_ext_port : out std_logic;
+    sci_rx_osc_ext_port : out std_logic;
+    morse_tx_led_port : out std_logic; 
     morse_tx_osc_port : out std_logic; 
     receive_en_ext_port : out std_logic;
     transmit_en_ext_port : out std_logic);
 end component;
 
 
--- Device 1 Signals
+---------------------------
+--Device 1 Signals
+---------------------------
 -- Inputs
 signal clk_1      : std_logic := '0';
 signal sci_rx_data_1     : std_logic := '1'; 
@@ -50,7 +57,9 @@ signal sci_tx_done_1  : std_logic;
 signal morse_tx_done_1 : std_logic;
 signal morse_audio_1  : std_logic;
 
--- Device 2 Signals
+---------------------------
+--Device 2 Signals
+---------------------------
 -- Inputs
 signal clk_2      : std_logic := '0';
 signal sci_rx_data_2  : std_logic := '1'; 
@@ -64,16 +73,19 @@ signal sci_tx_done_2  : std_logic;
 signal morse_tx_done_2 : std_logic;
 signal morse_audio_2  : std_logic;
 
--- Clock period definitions
+-----------------------------------------
+--Internal Simulation Signal Declarations
+-----------------------------------------
 constant clk_period : time := 10 ns;  -- Assuming a 100 MHz clock
 constant SCI_BAUD_PERIOD : integer := 10416;
 constant MORSE_BAUD_PERIOD : integer := 10416;
 signal device_2_sci_data : std_logic_vector(67 downto 0) := (others => '1');
 
-
 begin
 
-    -- Instantiate the Unit Under Test (UUT)
+-----------------------------------------
+--Instantiate two devices
+-----------------------------------------
     device1: top_level port map (
         clk_ext_port => clk_1,
         sci_data_ext_port => sci_rx_data_1,
@@ -102,7 +114,9 @@ begin
         
     morse_rx_data_1 <= morse_tx_2;  --hardwire device 2's morse output to device 1's morse input
 
-    -- Clock process definitions
+--------------------------------------------------
+--Clock process (two different out of sync clocks) 
+--------------------------------------------------
     clk_1_process : process
     begin
         clk_1 <= not clk_1;
@@ -113,14 +127,16 @@ begin
     begin
         clk_2 <= not clk_1;    -- second clock is the inverse of the first one to make tb close to real life, by unsyncing the clocks
     end process;
-    
+--------------------------------------------------
+--Stimulus process 
+-------------------------------------------------- 
     stim_process : process
     begin
         wait for 50 * clk_period; --initialize the process
         device_switch_1 <= '1';   --first device is morse rx and sci tx
         device_switch_2 <= '0';   -- sercond device is sci rx and morse tx
         
-        --sci data for device 2
+        --sci data for device 2 (A _space_ LLLL)
         device_2_sci_data <= "11111010000010100000010010001100101000110010100011001010001100101111";
         wait for 5 * clk_period;
         for i in 67 downto 0 loop
@@ -132,7 +148,7 @@ begin
         rx_tx_switch_2 <= '1'; --transmit morse data from device 2
         
         wait for 100 * MORSE_BAUD_PERIOD * clk_period; -- receive the morse data from device 2 on device 1
-        rx_tx_switch_1 <= '1'; -- transmit the sci data from device 1 to device 2
+        rx_tx_switch_1 <= '1'; -- transmit the sci data from device 1
         
         
         wait; 

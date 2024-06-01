@@ -15,42 +15,56 @@ END Morse_RX_tb;
 
 ARCHITECTURE testbench OF Morse_RX_tb IS 
 
-    -- Component Declaration for the Unit Under Test (UUT)
+---------------------------
+--Component Declaration
+---------------------------
     COMPONENT Morse_RX
     generic(
         BAUD_PERIOD : integer);
     PORT(
-        --receive_en : in std_logic;
+        receive_en : in std_logic;
         clk : in STD_Logic;
         rx : in std_logic;
         morse_ready : out std_logic;
         morse_output : out std_logic_vector(21 downto 0));
     END COMPONENT;
     
-    --Inputs
+---------------------------
+--Inputs
+---------------------------
     signal clk : std_logic := '0';
     signal rx : std_logic := '1';
+    signal receive_en : std_logic := '0';
 
-    --Outputs
+---------------------------
+--Outputs
+---------------------------
     signal morse_output      : std_logic_vector(21 downto 0);
     signal morse_ready       : std_logic;
 
-    -- Clock period definitions
+---------------------------
+--Clock period definitions
+---------------------------
     constant clk_period : time := 100 ns; -- 10 MHz
 
 BEGIN
 
-    -- Instantiate the Unit Under Test (UUT)
+---------------------------
+--Instantiate uut
+---------------------------
     uut: Morse_RX 
     generic map(
     BAUD_PERIOD => 392)
     PORT MAP (
+        receive_en => receive_en,
         rx => rx,
         morse_output => morse_output, 
         morse_ready => morse_ready, 
         clk => clk);
 
-    -- Clock process definitions
+---------------------------
+--Clock process
+---------------------------
     clk_process :process
     begin
         clk <= '0';
@@ -59,11 +73,14 @@ BEGIN
         wait for clk_period/2;
     end process;
 
-    -- Stimulus process
+---------------------------
+--Stimulus process
+---------------------------
     stim_proc: process
     begin        
         -- Initialize Inputs
         rx <= '0';
+        receive_en <= '1'; 
         wait for clk_period * 1000; 
         
         rx <= '0'; 
@@ -133,6 +150,43 @@ BEGIN
         wait for clk_period * 3 * 392;
         
         rx <= '0';
+        receive_en <= '0'; 
+        
+        -- the rest should be ignored, because receive is disabled
+        wait for 5 * clk_period; 
+        
+        rx <= '0'; 
+        wait for clk_period * 1 * 392; 
+        
+        rx <= '1'; 
+        wait for clk_period * 3 * 392; 
+        
+        rx <= '0'; 
+        wait for clk_period * 1 * 392; 
+        
+        rx <= '1'; 
+        wait for clk_period * 3 * 392;
+        
+        rx <= '0'; 
+        wait for clk_period * 1 * 392; 
+        
+        rx <= '1'; 
+        wait for clk_period * 3 * 392;
+        
+        rx <= '0'; 
+        wait for clk_period * 1 * 392; 
+        
+        rx <= '1'; 
+        wait for clk_period * 3 * 392;
+        
+        rx <= '0'; 
+        wait for clk_period * 1 * 392; 
+        
+        rx <= '1'; 
+        wait for clk_period * 3 * 392;
+        
+        rx <= '0'; 
+        
         wait;
         
     end process;

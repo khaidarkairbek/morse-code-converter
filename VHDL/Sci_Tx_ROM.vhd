@@ -7,7 +7,6 @@
 -- Description: SCI Transmitter
 ----------------------------------------------------------------------------------
 
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -26,20 +25,28 @@ entity Sci_Tx_ROM is
 end Sci_Tx_ROM;
 
 architecture Behavioral of Sci_Tx_ROM is
---FSM states 
+---------------------------
+--FSM States
+---------------------------
 type state_type is (Idle, Load, Read_ROM, Transmit, Check, Done);
 signal CS, NS : state_type := Idle;
 
---FSM signals 
+---------------------------
+--FSM Signals
+---------------------------
 Signal symbol_load : std_logic := '0';
 signal length_tc : std_logic := '0';
 Signal length_cnt_en  : std_Logic := '0';
 signal rom_read : std_logic := '0'; 
 
--- ROM signals 
+---------------------------
+--ROM Signals
+---------------------------
 Signal sci_code : std_logic_vector(9 downto 0) := (others => '0');
 
--- Datapath signals
+---------------------------
+--Datapath Signals
+---------------------------
 signal new_bit : std_logic := '0';
 signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(9 downto 0) :=(others => '1');
@@ -64,9 +71,9 @@ begin
     end if;
 end process; 
 
--------------------
+---------------------------------
 -- Bit counter and shift register
--------------------
+---------------------------------
 bit_counter: process(clk, bit_cnt)
 begin
     if rising_edge(clk) then 
@@ -92,7 +99,7 @@ new_symbol <= symbol_load;
 
 
 -------------------
---FSM LOGIC 
+--FSM Logic
 -------------------
 state_update : process(clk) 
 begin 

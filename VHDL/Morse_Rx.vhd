@@ -7,11 +7,8 @@
 -- Description: Morse Receiver
 ----------------------------------------------------------------------------------
 
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
-
 use IEEE.NUMERIC_STD.ALL;
 
 entity Morse_RX is
@@ -26,22 +23,29 @@ entity Morse_RX is
 end Morse_RX;
 
 architecture Behavioral of Morse_RX is
--- FSM states 
+---------------------------
+--FSM States
+---------------------------
 type state_type is (Idle, Shift, Ready, CheckSpace, SpaceReady, NotLegit, ClearReg);
 signal CS, NS : State_type := Idle;
 
--- FSM Control Signlas
+---------------------------
+--FSM Control Signals
+---------------------------
 signal baud_cnt_en : std_logic := '0';
 Signal bit_cnt_en : std_logic := '0';
 signal zero_cnt_en : std_logic := '0';
+signal reg_clr : std_logic := '0';
+signal bit_cnt_clr : std_logic := '0';
 
--- Datapath signals
+---------------------------
+--Datapath Signals
+---------------------------
 constant HALF_BAUD_PERIOD : integer := BAUD_PERIOD / 2;
 signal baud_cnt: integer := 0;
 signal baud_tc : std_logic := '0';
 signal half_baud_tc : std_logic := '0';
 signal bit_tc : std_logic := '0'; 
-signal bit_cnt_clr : std_logic := '0';
 signal not_legit_tc : std_logic := '0';
 signal zero_cnt : integer := 0;
 signal two_zero_tc : std_logic := '0'; 
@@ -49,10 +53,11 @@ signal three_zero_tc : std_logic := '0';
 signal seven_zero_tc  : std_logic := '0';
 signal bit_cnt : integer := 0;
 signal data_register : std_logic_vector(21 downto 0) := (others => '0');
-signal reg_clr : std_logic := '0';
 
 begin
-
+---------------------------
+--Baud Counter
+---------------------------
 baud_counter: process(clk, baud_cnt)
 begin
 	if rising_edge(clk) then
@@ -76,6 +81,9 @@ begin
     end if;
 end process; 
 
+---------------------------
+--Bit counter
+---------------------------
 bit_counter: process(clk, bit_cnt)
 begin
 	if rising_edge(clk) then
@@ -95,6 +103,9 @@ begin
     end if;
 end process;
 
+---------------------------
+--Zero Counter
+---------------------------
 zero_counter: process(clk, zero_cnt)
 begin
 	if rising_edge(clk) then
@@ -107,7 +118,7 @@ begin
         end if; 
     end if; 
     
-    -- asynchronous bit count TC
+    -- asynchronous zero coumt TCs
     two_zero_tc <= '0'; 
     if zero_cnt = 2 then 
     	two_zero_tc <= '1'; 
@@ -124,7 +135,9 @@ begin
     end if;
 
 end process;
-
+---------------------------
+--Shift Register
+---------------------------
 shift_register: process(clk)
 begin
     if rising_edge(clk) then 
