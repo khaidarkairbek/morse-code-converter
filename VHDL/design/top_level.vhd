@@ -22,13 +22,9 @@ port(
     morse_tx_ext_port : out std_logic;   -- JA1 (J1)
     morse_tx_done_ext_port : out std_logic; -- LED L1
     morse_audio_ext_port: out std_logic;  -- JC1 (K17)
-    sci_tx_osc_port : out std_logic;   -- JA2 (L2)
-    morse_rx_osc_port : out std_logic;  -- JB4 (B16)
 	sci_tx_ext_port : out std_logic;    -- USB UART Bridge Tx (A18)
     sci_tx_done_ext_port : out std_logic;  -- LED U16
-    sci_rx_osc_ext_port : out std_logic; --JB2 (A16)
     morse_tx_led_port : out std_logic;  -- LED8 (V13)
-    morse_tx_osc_port : out std_logic;  -- JB1 (A14)
     receive_en_ext_port : out std_logic;   -- LED E19
     transmit_en_ext_port : out std_logic);  -- LED P1
 end top_level;
@@ -378,15 +374,11 @@ end process;
 
 receive_en_ext_port <= sci_receive_en or morse_receive_en;
 transmit_en_ext_port <= morse_transmit_en or sci_transmit_en;
-sci_rx_osc_ext_port <= sci_data_ext_port;
-morse_tx_osc_port <= morse_tx_output;
 sci_tx_ext_port <= sci_data_ext_port when CS = SciReceive else sci_tx_output; 
 sci_tx_done_ext_port <= sci_tx_done;
 morse_tx_ext_port <= morse_tx_output; 
 morse_tx_done_ext_port <= morse_tx_done;
 morse_audio_ext_port <= audio_output; 
-morse_rx_osc_port <= morse_data_ext_port;
-sci_tx_osc_port <= sci_tx_output;
 morse_tx_led_port <= morse_tx_output;
 
 end Behavioral; 
